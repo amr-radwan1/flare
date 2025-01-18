@@ -168,18 +168,19 @@ export default function Trending() {
               </View>
             </View>
           ))}
-          <View style={styles.navbar}>
-            <TouchableOpacity onPress={navigateToProfile} >
-              <Cloud size={24} color="#fff" />
-            </TouchableOpacity>
-            <Thermometer size={24} color="#fff" />
-            <Plus size={24} color="#fff" />
-            <Search size={24} color="#fff" />
-            <TouchableOpacity onPress={navigateToProfile} >
-              <User size={24} color="#fff" /> {/* User Icon */}
-            </TouchableOpacity>
-          </View>
+
         </ScrollView>
+        <View style={styles.navbar}>
+          <TouchableOpacity onPress={navigateToProfile} >
+            <Cloud size={24} color="#fff" />
+          </TouchableOpacity>
+          <Thermometer size={24} color="#fff" />
+          <Plus size={24} color="#fff" />
+          <Search size={24} color="#fff" />
+          <TouchableOpacity onPress={navigateToProfile} >
+            <User size={24} color="#fff" /> {/* User Icon */}
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
