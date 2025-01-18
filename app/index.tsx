@@ -3,6 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Aler
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types/navigation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 type indexScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'index'>;
 
@@ -30,8 +32,12 @@ export default function Index() {
       if (response.ok) {
         const data = await response.json();
 
-        // Navigate to TrendingScreen
-        navigation.navigate('Trending');
+        const UserID = data.UserID;
+
+        if (UserID) {
+          await AsyncStorage.setItem('UserID', UserID.toString());
+          navigation.navigate('Trending');
+        }
       } else {
         const errorData = await response.json();
         Alert.alert('Error', errorData.message || 'Login failed');

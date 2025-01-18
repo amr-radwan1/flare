@@ -49,7 +49,7 @@ export default function Register() {
         {/* Logo and App Name */}
         <Text style={styles.logo}>logo</Text>
         <Text style={styles.appName}>appname</Text>
-
+        
         {/* Form Fields */}
         <View style={styles.formContainer}>
           <View style={styles.inputGroup}>
@@ -63,7 +63,7 @@ export default function Register() {
             />
           </View>
 
-          <View style={styles.inputGroup}>
+          {/* <View style={styles.inputGroup}>
             <Text style={styles.label}>first name</Text>
             <TextInput
               style={styles.input}
@@ -83,7 +83,7 @@ export default function Register() {
               placeholder="doe"
               placeholderTextColor="#666"
             />
-          </View>
+          </View> */}
         </View>
 
         {/* Sign Up Button */}
