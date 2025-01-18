@@ -12,6 +12,8 @@ import { RootStackParamList } from './types/navigation';
 import * as Font from 'expo-font'; // Import expo-font
 import { useNavigation } from '@react-navigation/native';
 import { Cloud, Thermometer, Plus, Search, User } from 'lucide-react-native';
+import Navbar from './Navbar'; // Import the Navbar component
+
 
 
 interface Post {
@@ -160,15 +162,7 @@ export default function Trending() {
               </View>
             </View>
           ))}
-          <View style={styles.navbar}>
-            <Cloud size={24} color="#fff" />
-            <Thermometer size={24} color="#fff" />
-            <Plus size={24} color="#fff" />
-            <Search size={24} color="#fff" />
-            <TouchableOpacity onPress={navigateToProfile} >
-              <User size={24} color="#fff" /> {/* User Icon */}
-            </TouchableOpacity>
-          </View>
+          <Navbar />
         </ScrollView>
       </View>
     </View>
