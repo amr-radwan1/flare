@@ -149,7 +149,6 @@ export default function Trending() {
         <ScrollView style={styles.postsContainer}>
           {posts.map((post) => (
             <View key={post.PostID} style={styles.postCard}>
-              {/* Access PromptText and Category from the post object */}
               {post.PromptText && (
                 <Text style={styles.promptText}>
                   {post.PromptText}
@@ -165,16 +164,17 @@ export default function Trending() {
               </View>
             </View>
           ))}
-          <View style={styles.navbar}>
-            <Cloud size={24} color="#fff" />
-            <Thermometer size={24} color="#fff" />
-            <Plus size={24} color="#fff" />
-            <Search size={24} color="#fff" />
-            <TouchableOpacity onPress={navigateToProfile} >
-              <User size={24} color="#fff" /> {/* User Icon */}
-            </TouchableOpacity>
-          </View>
         </ScrollView>
+      </View>
+
+      <View style={styles.navbar}>
+        <Cloud size={28} color="#fff" />
+        <Thermometer size={28} color="#fff" strokeWidth={4} />
+        <Plus size={28} color="#fff" />
+        <Search size={28} color="#fff" />
+        <TouchableOpacity onPress={navigateToProfile}>
+          <User size={28} color="#fff" />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -191,49 +191,46 @@ const styles = StyleSheet.create({
   outsideContainer: {
     flex: 1,
     backgroundColor: '#fff',
+    justifyContent: 'space-between', // Ensures content and navbar are spaced out
   },
   container: {
     backgroundColor: '#fff',
     paddingTop: 60,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: 1, // Takes up the remaining space, pushing the navbar down
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
     paddingHorizontal: 20,
     marginBottom: 20,
-    fontFamily: 'Libre Baskerville', // Apply Libre Baskerville here
+    fontFamily: 'Libre Baskerville',
   },
   categoriesContainer: {
     paddingHorizontal: 16,
   },
   categoryButton: {
-    paddingHorizontal: 12, // Reduced horizontal padding
-    paddingVertical: 6,    // Reduced vertical padding
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     marginRight: 8,
     borderRadius: 20,
     backgroundColor: '#f5f5f5',
-    width: 100, // Fixed width for the category buttons
-    flexShrink: 1, // Prevent button from stretching
-    justifyContent: 'center',  // Ensure text is centered vertically
-    alignItems: 'center',      // Ensure text is centered horizontally
+    width: 100,
+    flexShrink: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   selectedCategory: {
     backgroundColor: '#000',
     color: '#FFFFF'
   },
   selectedCategoryText: {
-    color: '#fff', // Set text color to white when selected
+    color: '#fff',
   },
   categoryText: {
     fontSize: 14,
     color: '#333',
     textAlign: 'center',
-    fontFamily: 'Libre Baskerville', // Apply Libre Baskerville to category text
+    fontFamily: 'Libre Baskerville',
   },
   postsContainer: {
     paddingHorizontal: 20,
@@ -245,10 +242,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 12,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -257,13 +251,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginBottom: 8,
-    fontFamily: 'Libre Baskerville', // Apply Libre Baskerville to prompt text
+    marginRight: 8,
+    fontFamily: 'Libre Baskerville',
   },
   postText: {
     fontSize: 20,
     fontWeight: '600',
     marginBottom: 8,
-    fontFamily: 'Libre Baskerville', // Apply Libre Baskerville to post text
+    fontFamily: 'Libre Baskerville',
   },
   voteContainer: {
     position: 'absolute',
@@ -277,6 +272,6 @@ const styles = StyleSheet.create({
   voteCount: {
     fontSize: 16,
     fontWeight: '500',
-    fontFamily: 'Libre Baskerville', // Apply Libre Baskerville to vote count text
+    fontFamily: 'Libre Baskerville',
   },
 });
