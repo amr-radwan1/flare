@@ -181,8 +181,9 @@ export default function Trending() {
               </View>
             </View>
           ))}
-          <Navbar />
+
         </ScrollView>
+        <Navbar />
       </View>
     </View>
   );
