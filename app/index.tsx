@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from './types/navigation'; 
+import { RootStackParamList } from './types/navigation';
 
-type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
+type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'index'>;
 
 export default function Index() {
   const [Username, setUsername] = useState('');
@@ -74,7 +74,7 @@ export default function Index() {
         </TouchableOpacity>
 
         {/* Sign Up Link */}
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={() => navigation.navigate('Register')}
           style={styles.signUpContainer}
         >

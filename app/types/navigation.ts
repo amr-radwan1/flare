@@ -1,5 +1,5 @@
 export type RootStackParamList = {
-  Login: undefined;
+  index: undefined;
   Register: undefined;
   TrendingScreen: undefined; // Add this line
 };

@@ -8,10 +8,10 @@ const AuthStack = createNativeStackNavigator();
 export default function AuthNavigator() {
   return (
     <AuthStack.Navigator>
-      <AuthStack.Screen 
-        name="Index" 
-        component={Index} 
-        options={{ headerShown: false }} 
+      <AuthStack.Screen
+        name="Index"
+        component={Index}
+        options={{ headerShown: false }}
       />
       <AuthStack.Screen name="Register" component={Register} />
       <AuthStack.Screen name="Trending" component={Trending} />

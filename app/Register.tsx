@@ -1,6 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from './types/navigation';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
+
+type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>;
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -8,6 +13,8 @@ export default function Register() {
     firstName: '',
     lastName: '',
   });
+
+  const navigation = useNavigation<LoginScreenNavigationProp>();
 
   const handleSignUp = async () => {
     try {
@@ -21,6 +28,7 @@ export default function Register() {
 
       if (response.ok) {
         const data = await response.json();
+        navigation.navigate('index');
         Alert.alert('Success', 'Registration successful!');
         console.log('Registration successful:', data);
       } else {
