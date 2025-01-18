@@ -3,21 +3,28 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } fr
 import { Cloud, Thermometer, Plus, Search, User } from 'lucide-react-native';
 
 // Types for our data
-// Types for our data
 interface Post {
-    PostID: string;
-    promptText: string; // Updated from "question" to "promptText"
-    PostText: string;
-    category: string; // Category from the prompts table
-    UpvoteCount: number;
-    DownvoteCount: number;
+  PostID: string;
+  PromptID: string;  // New field to store PromptID
+  PostText: string;
+  Category: string;  // Category from the prompts table
+  UpvoteCount: number;
+  DownvoteCount: number;
 }
-  
+
+interface Prompt {
+  PromptText: string;
+  Category: string;  // Category from the prompts table
+}
+
 const categories = ['Sports', 'Music', 'Movies', 'Food'];
 
 export default function Trending() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // To store prompt data for each post
+  const [prompts, setPrompts] = useState<Map<string, Prompt>>(new Map());
 
   useEffect(() => {
     fetchPosts();
@@ -37,31 +44,51 @@ export default function Trending() {
       
       // Get top 20 posts
       setPosts(sortedPosts.slice(0, 20));
+
+      // Fetch prompt data for each post
+      sortedPosts.forEach((post: Post) => {
+        fetchPromptById(post.PromptID);
+      });
+
     } catch (error) {
       console.error('Error fetching posts:', error);
     }
   };
 
+  const fetchPromptById = async (PromptID: string) => {
+    try {
+      const response = await fetch(`http://34.139.77.174/api/prompts/${PromptID}`);
+      const data = await response.json();
+
+      // Save the prompt data in the state map
+      setPrompts(prev => new Map(prev).set(PromptID, data));
+
+    } catch (error) {
+      console.error('Error fetching prompt data:', error);
+    }
+  };
+
   const filteredPosts = selectedCategory
-    ? posts.filter(post => post.category === selectedCategory)
+    ? posts.filter(post => post.Category === selectedCategory)
     : posts;
 
   const getVoteIcon = (post: Post) => {
     // Determine which count to show based on which is higher
     const showUpvotes = post.UpvoteCount > post.DownvoteCount;
     const count = showUpvotes ? post.UpvoteCount : post.DownvoteCount;
-    
+  
     return (
       <View style={[styles.voteContainer, { backgroundColor: showUpvotes ? '#ffebee' : '#fff3e0' }]}>
         <Text style={styles.voteCount}>{count}</Text>
-        <Text style={styles.voteEmoji}>{showUpvotes ? '🔥' : '❄️'}</Text>
+        <Text style={styles.voteEmoji}>{showUpvotes ? '🔥' : '❄️'}</Text> {/* Both count and emoji wrapped in <Text> */}
       </View>
     );
   };
+    
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>trending</Text>
+      <Text style={styles.title}>Trending</Text>
       
       {/* Category Filters */}
       <ScrollView 
@@ -89,8 +116,9 @@ export default function Trending() {
         {filteredPosts.map((post) => (
           <View key={post.PostID} style={styles.postContainer}>
             <View style={styles.postContent}>
-              <Text style={styles.question}>{post.promptText}</Text> {/* Updated to use promptText */}
+              <Text style={styles.question}>{prompts.get(post.PromptID)?.PromptText}</Text> {/* Updated to use PromptText */}
               <Text style={styles.answer}>{post.PostText}</Text>
+              <Text style={styles.category}>{prompts.get(post.PromptID)?.Category}</Text> {/* Display category */}
             </View>
             {getVoteIcon(post)}
           </View>
@@ -108,7 +136,7 @@ export default function Trending() {
     </SafeAreaView>
   );
 }
-  
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -166,6 +194,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  category: {
+    fontSize: 14,
+    color: '#999',
+  },
   voteContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -190,4 +222,3 @@ const styles = StyleSheet.create({
     borderTopColor: '#eee',
   },
 });
-

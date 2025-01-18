@@ -56,7 +56,7 @@ export default function Index() {
         <View style={styles.formContainer}>
           <View style={styles.inputGroup}>
             <Text style={styles.label}>username</Text>
-            <TextInput
+            <TextInput    
               style={styles.input}
               value={Username}
               onChangeText={setUsername}
