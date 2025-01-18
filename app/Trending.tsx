@@ -49,7 +49,7 @@ export default function Trending() {
   };
 
   const navigateToCloud = () => {
-    navigation.navigate('DailyPrompt')
+    navigation.navigate('DailyPrompt');
   }
 
   useEffect(() => {

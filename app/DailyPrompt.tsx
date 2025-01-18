@@ -1,7 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, ScrollView, TextInput, Image, ActivityIndicator, Alert } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  SafeAreaView,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+  Image,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import Icon from 'react-native-vector-icons/Feather';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Base API URL
+const API_BASE_URL = process.env.API_BASE_URL || 'http://34.139.77.174/api';
 
 // Avatar Component
 const Avatar = ({ letter, image, color }: { letter: string; image?: string; color?: string }) => (
@@ -14,32 +29,77 @@ const Avatar = ({ letter, image, color }: { letter: string; image?: string; colo
   </View>
 );
 
-export default function DiscussionScreen({ route }: any) {
-  const { post_id } = route.params; // Assume post_id is passed via navigation
-  const [replies, setReplies] = useState([]); // State to store replies
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(false); // Error state
+export default function DailyPrompt({ route }: { route: any }) {
+  const { post_id } = route.params; // Get post_id from navigation route params
+  const [replies, setReplies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [newReply, setNewReply] = useState('');
+  const [token, setToken] = useState<string | null>(null);
 
+  // Fetch replies when the component mounts
   useEffect(() => {
-    // Fetch replies from the API
     const fetchReplies = async () => {
       try {
-        const response = await fetch(`http://34.139.77.174/apiposts/${post_id}/replies`);
+        const userToken = await AsyncStorage.getItem('userToken');
+        setToken(userToken);
+
+        const response = await fetch(`${API_BASE_URL}/posts/${post_id}/replies`, {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        });
+
         if (!response.ok) {
           throw new Error('Failed to fetch replies');
         }
+
         const data = await response.json();
-        setReplies(data); // Update state with fetched replies
+        setReplies(data);
       } catch (err) {
-        setError(true); // Set error state if API fails
-        Alert.alert('Error', 'Failed to load replies.');
+        setError(true);
+        console.error(err);
+        Alert.alert('Error', 'Failed to load replies. Please try again.');
       } finally {
-        setLoading(false); // Stop loading spinner
+        setLoading(false);
       }
     };
 
     fetchReplies();
   }, [post_id]);
+
+  // Handle new reply submission
+  const handleReplySubmit = async () => {
+    if (!newReply.trim()) {
+      Alert.alert('Error', 'Reply cannot be empty.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/posts/${post_id}/replies`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ ReplyText: newReply }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit reply');
+      }
+
+      const data = await response.json();
+      setReplies((prevReplies) => [...prevReplies, data]);
+      setNewReply('');
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error', 'Failed to submit reply. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -48,25 +108,7 @@ export default function DiscussionScreen({ route }: any) {
         <View style={styles.content}>
           <Text style={styles.category}>🎵 Music</Text>
 
-          <Text style={styles.question}>
-            Who is the most overrated singer of all time?
-          </Text>
-
-          {/* Initial post */}
-          <View style={styles.post}>
-            <View style={styles.userInfo}>
-              <Avatar letter="A" color="#FFD700" />
-              <Text style={styles.userText}>alex smith says...</Text>
-            </View>
-            <View style={styles.answerContainer}>
-              <Text style={styles.answerText}>Taylor Swift</Text>
-              <View style={styles.temperatureContainer}>
-                <Icon name="thermometer" size={16} color="#FF4444" />
-                <Text style={styles.temperature}>110</Text>
-                <Icon name="fire" size={16} color="#FF4444" style={{ marginLeft: 4 }} />
-              </View>
-            </View>
-          </View>
+          <Text style={styles.question}>Who is the most overrated singer of all time?</Text>
 
           {/* Replies Section */}
           <View style={styles.replies}>
@@ -75,45 +117,31 @@ export default function DiscussionScreen({ route }: any) {
             ) : error ? (
               <Text style={styles.errorText}>Failed to load replies.</Text>
             ) : (
-              replies.map((reply, index) => (
+              replies.map((reply: any, index: number) => (
                 <View key={index} style={[styles.reply, styles.replyCard]}>
                   <View style={styles.userInfo}>
                     <Avatar letter={reply.author.charAt(0).toUpperCase()} />
                     <Text style={styles.userText}>{reply.author} replied...</Text>
                   </View>
-                  <Text style={styles.replyText}>{reply.content}</Text>
-                  <View style={styles.replyIcons}>
-                    <Icon name="check" size={16} color="#4CAF50" />
-                  </View>
+                  <Text style={styles.replyText}>{reply.ReplyText}</Text>
                 </View>
               ))
             )}
 
-            <Text style={styles.replyPrompt}>Reply to Alex Smith...</Text>
+            <Text style={styles.replyPrompt}>Reply to the discussion...</Text>
             <TextInput
               style={styles.input}
-              placeholder="I think that"
+              placeholder="Type your reply"
               placeholderTextColor="#666"
+              value={newReply}
+              onChangeText={setNewReply}
             />
+            <TouchableOpacity style={styles.submitButton} onPress={handleReplySubmit}>
+              <Text style={styles.submitButtonText}>Submit</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
-
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity>
-          <Icon name="cloud" size={24} color="#666" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Icon name="plus" size={24} color="#666" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Icon name="search" size={24} color="#666" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Icon name="user" size={24} color="#666" />
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
@@ -140,54 +168,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 24,
   },
-  post: {
-    marginBottom: 20,
-  },
-  userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 16,
-  },
-  avatarText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  userText: {
-    color: '#666',
-    fontSize: 14,
-  },
-  answerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  answerText: {
-    color: '#fff',
-    fontSize: 16,
-    marginRight: 8,
-  },
-  temperatureContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  temperature: {
-    color: '#666',
-    fontSize: 14,
-    marginLeft: 4,
-  },
   replies: {
     paddingLeft: 16,
   },
@@ -198,19 +178,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   replyText: {
     color: '#333',
     fontSize: 14,
-  },
-  replyIcons: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
   },
   replyPrompt: {
     color: '#666',
@@ -218,20 +189,24 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   input: {
-    color: '#666',
-    fontSize: 14,
-    padding: 8,
+    color: '#fff',
+    fontSize: 16,
+    padding: 12,
     backgroundColor: '#222',
     borderRadius: 10,
     marginTop: 8,
   },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#222',
-    backgroundColor: '#000',
+  submitButton: {
+    backgroundColor: '#007AFF',
+    padding: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   errorText: {
     color: '#FF4444',
