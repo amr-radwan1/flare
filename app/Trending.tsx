@@ -38,6 +38,8 @@ export default function Trending() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
 
+  const navigation = useNavigation<TrendingScreenNavigationProp>();
+
   useEffect(() => {
     fetchPosts();
   }, []);
