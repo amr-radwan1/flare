@@ -128,7 +128,12 @@ export default function Trending() {
               ]}
               onPress={() => setSelectedCategory(category.id)}
             >
-              <Text style={styles.categoryText}>
+              <Text
+                style={[
+                  styles.categoryText,
+                  selectedCategory === category.id && styles.selectedCategoryText,
+                ]}
+              >
                 {category.icon} {category.label}
               </Text>
             </TouchableOpacity>
@@ -197,6 +202,10 @@ const styles = StyleSheet.create({
   },
   selectedCategory: {
     backgroundColor: '#000',
+    color: '#FFFFF'
+  },
+  selectedCategoryText: {
+    color: '#fff', // Set text color to white when selected
   },
   categoryText: {
     fontSize: 14,
