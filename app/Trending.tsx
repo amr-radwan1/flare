@@ -181,16 +181,6 @@ export default function Trending() {
           </View>
         </ScrollView>
       </View>
-
-      <View style={styles.navbar}>
-        <Cloud size={28} color="#fff" />
-        <Thermometer size={28} color="#fff" strokeWidth={4} />
-        <Plus size={28} color="#fff" />
-        <Search size={28} color="#fff" />
-        <TouchableOpacity onPress={navigateToProfile}>
-          <User size={28} color="#fff" />
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
