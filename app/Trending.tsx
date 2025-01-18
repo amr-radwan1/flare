@@ -12,6 +12,8 @@ import { RootStackParamList } from './types/navigation';
 import * as Font from 'expo-font'; // Import expo-font
 import { useNavigation } from '@react-navigation/native';
 import { Cloud, Thermometer, Plus, Search, User } from 'lucide-react-native';
+import Navbar from './Navbar'; // Import the Navbar component
+
 
 
 interface Post {
@@ -58,10 +60,6 @@ export default function Trending() {
   const navigateToProfile = () => {
     navigation.navigate('ProfileScreen'); // Navigate to ProfileScreen
   };
-
-  const navigateToCloud = () => {
-    navigation.navigate('DailyPrompt');
-  }
 
   useEffect(() => {
     async function loadFonts() {
@@ -183,19 +181,8 @@ export default function Trending() {
               </View>
             </View>
           ))}
-
+          <Navbar />
         </ScrollView>
-        <View style={styles.navbar}>
-          <TouchableOpacity onPress={navigateToProfile} >
-            <Cloud size={24} color="#fff" />
-          </TouchableOpacity>
-          <Thermometer size={24} color="#fff" strokeWidth={4} />
-          <Plus size={24} color="#fff" />
-          <Search size={24} color="#fff" />
-          <TouchableOpacity onPress={navigateToProfile} >
-            <User size={24} color="#fff" /> {/* User Icon */}
-          </TouchableOpacity>
-        </View>
       </View>
     </View>
   );
