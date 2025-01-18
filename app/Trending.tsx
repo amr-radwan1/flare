@@ -9,8 +9,10 @@ import {
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types/navigation';
-import { useNavigation } from '@react-navigation/native';
 import * as Font from 'expo-font'; // Import expo-font
+import { useNavigation } from '@react-navigation/native';
+import { Cloud, Thermometer, Plus, Search, User } from 'lucide-react-native';
+
 
 interface Post {
   PostID: string;
@@ -41,6 +43,10 @@ export default function Trending() {
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   const navigation = useNavigation<TrendingScreenNavigationProp>();
+
+  const navigateToProfile = () => {
+    navigation.navigate('ProfileScreen'); // Navigate to ProfileScreen
+  };
 
   useEffect(() => {
     async function loadFonts() {
@@ -159,6 +165,15 @@ export default function Trending() {
               </View>
             </View>
           ))}
+          <View style={styles.navbar}>
+            <Cloud size={24} color="#fff" />
+            <Thermometer size={24} color="#fff" />
+            <Plus size={24} color="#fff" />
+            <Search size={24} color="#fff" />
+            <TouchableOpacity onPress={navigateToProfile} >
+              <User size={24} color="#fff" /> {/* User Icon */}
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </View>
     </View>
@@ -166,6 +181,13 @@ export default function Trending() {
 }
 
 const styles = StyleSheet.create({
+  navbar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: '#222',
+    paddingVertical: 20,
+  },
   outsideContainer: {
     flex: 1,
     backgroundColor: '#fff',

@@ -1,7 +1,8 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Cloud, Thermometer, Plus, Search, User } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Post {
   PostID: string;
@@ -11,83 +12,82 @@ interface Post {
   DownvoteCount: number;
 }
 
-interface Prompt {
-  PromptID: string;
-  PromptText: string;
-  Category: string;
-}
-
-interface FlareCard {
-  prompt: Prompt;
-  post: Post;
-}
-
-const FlareCard = ({ prompt, post }: { prompt: Prompt; post: Post }) => (
-  <View style={styles.card}>
-    <Text style={styles.questionText}>{prompt.PromptText}</Text>
-    <View style={styles.answerContainer}>
-      <Text style={styles.answerText}>{post.PostText}</Text>
-      <View style={styles.scoreContainer}>
-        <Thermometer size={24} color="#ff69b4" />
-        <Text style={styles.scoreText}>{post.UpvoteCount}</Text>
-      </View>
-    </View>
-  </View>
-);
+const getUserId = async () => {
+  try {
+    const userId = await AsyncStorage.getItem('UserID');
+    if (userId !== null) {
+      return userId;
+    }
+    console.log('User not logged in');
+    return null;
+  } catch (error) {
+    console.error('Error retrieving userId from AsyncStorage', error);
+    return null;
+  }
+};
 
 export default function ProfileScreen() {
-  // This would normally come from your data source
-  const controversyScore = 25;
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
-  const flares: FlareCard[] = [
-    {
-      prompt: {
-        PromptID: "1",
-        PromptText: "who is the greatest basketball player ... ?",
-        Category: "sports"
-      },
-      post: {
-        PostID: "1",
-        PromptID: "1",
-        PostText: "Michael Jordan",
-        UpvoteCount: 40,
-        DownvoteCount: 0
+  useEffect(() => {
+    const fetchPosts = async () => {
+      setIsLoading(true);
+      try {
+        const userId = await getUserId();
+        if (!userId) {
+          setError('User ID is not available');
+          setIsLoading(false);
+          return;
+        }
+        
+        const response = await fetch(`http://34.139.77.174/api/user/${userId}/posts`);
+        const data = await response.json();
+        setPosts(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+        setError('Failed to load posts');
+      } finally {
+        setIsLoading(false);
       }
-    },
-    {
-      prompt: {
-        PromptID: "2",
-        PromptText: "who is the most overrated singer of ... ?",
-        Category: "music"
-      },
-      post: {
-        PostID: "2",
-        PromptID: "2",
-        PostText: "Taylor Swift",
-        UpvoteCount: 110,
-        DownvoteCount: 0
-      }
-    },
-    {
-      prompt: {
-        PromptID: "3",
-        PromptText: "kiss, kill, marry: descartes, hume, ... ?",
-        Category: "philosophy"
-      },
-      post: {
-        PostID: "3",
-        PromptID: "3",
-        PostText: "Hume, Rousseau, Descartes",
-        UpvoteCount: 12,
-        DownvoteCount: 0
-      }
+    };
+    
+    fetchPosts();
+  }, []);
+
+  const controversyScore = 25;
+
+  const renderPosts = () => {
+    if (isLoading) {
+      return <ActivityIndicator size="large" color="#fff" />;
     }
-  ];
+
+    if (error) {
+      return <Text style={styles.errorText}>{error}</Text>;
+    }
+
+    if (!posts.length) {
+      return <Text style={styles.emptyText}>No posts yet</Text>;
+    }
+
+    return posts.map((post, index) => (
+      <View key={post.PostID || index} style={styles.card}>
+        <Text style={styles.questionText}>Prompt ID: {post.PromptID}</Text>
+        <View style={styles.answerContainer}>
+          <Text style={styles.answerText}>{post.PostText}</Text>
+          <View style={styles.scoreContainer}>
+            <Thermometer size={24} color="#ff69b4" />
+            <Text style={styles.scoreText}>{post.UpvoteCount}</Text>
+          </View>
+        </View>
+      </View>
+    ));
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        {/* Profile Header */}
         <View style={styles.header}>
           <View style={styles.profileInfo}>
             <Image
@@ -101,22 +101,17 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Controversy Score */}
         <View style={styles.scoreSection}>
           <Text style={styles.controversyTitle}>your controversy{'\n'}score is...</Text>
           <Text style={styles.controversyScore}>{controversyScore}</Text>
         </View>
 
-        {/* Flares Section */}
-        <View style={styles.flaresSection}>
-          <Text style={styles.flaresTitle}>your flares...</Text>
-          {flares.map((flare, index) => (
-            <FlareCard key={index} prompt={flare.prompt} post={flare.post} />
-          ))}
+        <View style={styles.postsSection}>
+          <Text style={styles.postsTitle}>your posts...</Text>
+          {renderPosts()}
         </View>
       </ScrollView>
 
-      {/* Navigation Bar */}
       <View style={styles.navbar}>
         <Cloud size={24} color="#fff" />
         <Thermometer size={24} color="#fff" />
@@ -129,6 +124,18 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  errorText: {
+    color: '#ff6b6b',
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  emptyText: {
+    color: '#666',
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 20,
+  },
   container: {
     flex: 1,
     backgroundColor: '#000',
@@ -173,10 +180,10 @@ const styles = StyleSheet.create({
     fontSize: 72,
     fontWeight: 'bold',
   },
-  flaresSection: {
+  postsSection: {
     padding: 20,
   },
-  flaresTitle: {
+  postsTitle: {
     color: '#fff',
     fontSize: 24,
     marginBottom: 20,
@@ -218,7 +225,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#222',
     paddingVertical: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
   },
 });
