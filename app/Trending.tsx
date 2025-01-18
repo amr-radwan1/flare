@@ -31,6 +31,8 @@ export default function Trending() {
   // To store prompt data for each post
   const [prompts, setPrompts] = useState<Map<string, Prompt>>(new Map());
 
+  const navigation = useNavigation<TrendingScreenNavigationProp>();
+
   useEffect(() => {
     fetchPosts();
   }, []);
