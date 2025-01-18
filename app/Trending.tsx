@@ -48,6 +48,10 @@ export default function Trending() {
     navigation.navigate('ProfileScreen'); // Navigate to ProfileScreen
   };
 
+  const navigateToCloud = () => {
+    navigation.navigate('DailyPrompt')
+  }
+
   useEffect(() => {
     async function loadFonts() {
       await Font.loadAsync({
@@ -166,7 +170,9 @@ export default function Trending() {
             </View>
           ))}
           <View style={styles.navbar}>
-            <Cloud size={24} color="#fff" />
+            <TouchableOpacity onPress={navigateToProfile} >
+              <Cloud size={24} color="#fff" />
+            </TouchableOpacity>
             <Thermometer size={24} color="#fff" />
             <Plus size={24} color="#fff" />
             <Search size={24} color="#fff" />
