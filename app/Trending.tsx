@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types/navigation';
+import { useNavigation } from '@react-navigation/native';
+import * as Font from 'expo-font'; // Import expo-font
 
 interface Post {
   PostID: string;
@@ -41,17 +43,25 @@ export default function Trending() {
   const navigation = useNavigation<TrendingScreenNavigationProp>();
 
   useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync({
+        'Libre Baskerville': require('../assets/fonts/LibreBaskerville-Bold.ttf'),
+        // You can add more fonts if needed
+      });
+    }
+    loadFonts();
     fetchPosts();
   }, []);
 
   const fetchPosts = async () => {
     try {
+
       const response = await fetch('http://34.139.77.174/api/posts');
       const data = await response.json();
-      
+
       // Sort by total engagement and take top 20
       const sortedPosts = data
-        .sort((a: Post, b: Post) => 
+        .sort((a: Post, b: Post) =>
           (b.UpvoteCount + b.DownvoteCount) - (a.UpvoteCount + a.DownvoteCount)
         )
         .slice(0, 20);
@@ -61,15 +71,15 @@ export default function Trending() {
         sortedPosts.map(async (post: Post) => {
           try {
             const promptResponse = await fetch(`http://34.139.77.174/api/prompt/${post.PromptID}`);
-            
+
             if (!promptResponse.ok) {
               console.error('Failed to fetch prompt for post:', post.PromptID);
               return { ...post, PromptText: '', Category: '' }; // Return post with empty values in case of error
             }
-      
-            const prompt = await promptResponse.json();      
+
+            const prompt = await promptResponse.json();
             const { PromptText, Category } = prompt;
-      
+
             return { ...post, PromptText, Category }; // Add only the PromptText and Category to the post
           } catch (error) {
             console.error('Error fetching prompt:', error);
@@ -77,7 +87,7 @@ export default function Trending() {
           }
         })
       );
-      
+
 
 
       setPosts(postsWithPrompts);
@@ -97,59 +107,65 @@ export default function Trending() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>trending</Text>
-      
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoriesContainer}
-      >
-        {categories.map((category) => (
-          <TouchableOpacity
-            key={category.id}
-            style={[
-              styles.categoryButton,
-              selectedCategory === category.id && styles.selectedCategory,
-            ]}
-            onPress={() => setSelectedCategory(category.id)}
-          >
-            <Text style={styles.categoryText}>
-              {category.icon} {category.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+    <View style={styles.outsideContainer}>
+      <View style={styles.container}>
+        <Text style={styles.title}>trending today</Text>
 
-      <ScrollView style={styles.postsContainer}>
-        {posts.map((post) => (
-          <View key={post.PostID} style={styles.postCard}>
-            {/* Access PromptText and Category from the post object */}
-            {post.PromptText && (
-              <Text style={styles.promptText}>
-                {post.PromptText}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={[
+            styles.categoriesContainer,
+            { height: 40 }, // Example height
+          ]}
+        >
+          {categories.map((category) => (
+            <TouchableOpacity
+              key={category.id}
+              style={[
+                styles.categoryButton,
+                selectedCategory === category.id && styles.selectedCategory,
+              ]}
+              onPress={() => setSelectedCategory(category.id)}
+            >
+              <Text style={styles.categoryText}>
+                {category.icon} {category.label}
               </Text>
-            )}
-            <Text style={styles.postText}>
-              {post.PostText}
-            </Text>
-            <View style={styles.voteContainer}>
-              <Text style={styles.voteCount}>
-                {post.UpvoteCount + post.DownvoteCount}
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        <ScrollView style={styles.postsContainer}>
+          {posts.map((post) => (
+            <View key={post.PostID} style={styles.postCard}>
+              {/* Access PromptText and Category from the post object */}
+              {post.PromptText && (
+                <Text style={styles.promptText}>
+                  {post.PromptText}
+                </Text>
+              )}
+              <Text style={styles.postText}>
+                {post.PostText}
               </Text>
+              <View style={styles.voteContainer}>
+                <Text style={styles.voteCount}>
+                  {post.UpvoteCount + post.DownvoteCount}
+                </Text>
+              </View>
             </View>
-          </View>
-        ))}
-      </ScrollView>
-
-
+          ))}
+        </ScrollView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  outsideContainer: {
     flex: 1,
+    backgroundColor: '#fff',
+  },
+  container: {
     backgroundColor: '#fff',
     paddingTop: 60,
   },
@@ -163,10 +179,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     paddingHorizontal: 20,
     marginBottom: 20,
+    fontFamily: 'Libre Baskerville', // Apply Libre Baskerville here
   },
   categoriesContainer: {
     paddingHorizontal: 16,
-    marginBottom: 10,  // Reduced margin to make it smaller
   },
   categoryButton: {
     paddingHorizontal: 12, // Reduced horizontal padding
@@ -183,12 +199,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
   categoryText: {
-    fontSize: 14, // Smaller font size for the category
+    fontSize: 14,
     color: '#333',
-    textAlign: 'center', // Ensure the text is centered
+    textAlign: 'center',
+    fontFamily: 'Libre Baskerville', // Apply Libre Baskerville to category text
   },
   postsContainer: {
     paddingHorizontal: 20,
+    paddingTop: 15,
   },
   postCard: {
     backgroundColor: '#fff',
@@ -208,11 +226,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginBottom: 8,
+    fontFamily: 'Libre Baskerville', // Apply Libre Baskerville to prompt text
   },
   postText: {
     fontSize: 20,
     fontWeight: '600',
     marginBottom: 8,
+    fontFamily: 'Libre Baskerville', // Apply Libre Baskerville to post text
   },
   voteContainer: {
     position: 'absolute',
@@ -226,5 +246,6 @@ const styles = StyleSheet.create({
   voteCount: {
     fontSize: 16,
     fontWeight: '500',
+    fontFamily: 'Libre Baskerville', // Apply Libre Baskerville to vote count text
   },
 });
