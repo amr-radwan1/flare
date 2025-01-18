@@ -20,6 +20,7 @@ interface Post {
   PostText: string;
   UpvoteCount: number;
   DownvoteCount: number;
+  Category: string;
 }
 
 interface Prompt {
@@ -34,6 +35,12 @@ const categories = [
   { id: 'music', label: 'Music', icon: '🎵' },
   { id: 'movies', label: 'Movies', icon: '🎬' },
   { id: 'food', label: 'Food', icon: '🍽' },
+  { id: 'fashion', label: 'Fashion', icon: '🧥' },
+  { id: 'tech', label: 'Tech', icon: '📱' },
+  { id: 'travel', label: 'Travel', icon: '🌍' },
+  { id: 'politics', label: 'Politics', icon: '⚖️' },
+  { id: 'health', label: 'Health', icon: '🩺' },
+  { id: 'fitness', label: 'Fitness', icon: '🏋️‍♂️' },
 ];
 type TrendingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Trending'>;
 
@@ -41,6 +48,10 @@ export default function Trending() {
   const [posts, setPosts] = useState<(Post & { prompt?: Prompt })[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
+
+  const handleCategoryPress = (categoryId: string) => {
+    setSelectedCategory(prevCategory => prevCategory === categoryId ? 'all' : categoryId);
+  };
 
   const navigation = useNavigation<TrendingScreenNavigationProp>();
 
@@ -72,7 +83,7 @@ export default function Trending() {
       // Sort by total engagement and take top 20
       const sortedPosts = data
         .sort((a: Post, b: Post) =>
-          (b.UpvoteCount + b.DownvoteCount) - (a.UpvoteCount + a.DownvoteCount)
+          (b.UpvoteCount) - (a.UpvoteCount)
         )
         .slice(0, 20);
 
@@ -136,7 +147,7 @@ export default function Trending() {
                 styles.categoryButton,
                 selectedCategory === category.id && styles.selectedCategory,
               ]}
-              onPress={() => setSelectedCategory(category.id)}
+              onPress={() => handleCategoryPress(category.id)}
             >
               <Text
                 style={[
@@ -153,14 +164,18 @@ export default function Trending() {
         <ScrollView style={styles.postsContainer}>
           {posts.map((post) => (
             <View key={post.PostID} style={styles.postCard}>
-              {post.PromptText && (
-                <Text style={styles.promptText}>
-                  {post.PromptText}
-                </Text>
-              )}
+              <View style={{ maxWidth: 270 }}>
+                {post.PromptText && (
+                  <Text style={styles.promptText}>
+                    {post.PromptText}
+                  </Text>
+                )}
+              </View>
+
               <Text style={styles.postText}>
                 {post.PostText}
               </Text>
+
               <View style={styles.voteContainer}>
                 <Text style={styles.voteCount}>
                   {post.UpvoteCount + post.DownvoteCount}
@@ -174,7 +189,7 @@ export default function Trending() {
           <TouchableOpacity onPress={navigateToProfile} >
             <Cloud size={24} color="#fff" />
           </TouchableOpacity>
-          <Thermometer size={24} color="#fff" />
+          <Thermometer size={24} color="#fff" strokeWidth={4} />
           <Plus size={24} color="#fff" />
           <Search size={24} color="#fff" />
           <TouchableOpacity onPress={navigateToProfile} >
@@ -204,6 +219,10 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     flex: 1, // Takes up the remaining space, pushing the navbar down
   },
+  loadingContainer: {
+    backgroundColor: '#fff',
+    flex: 1, // Takes up the remaining space, pushing the navbar down
+  },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
@@ -220,7 +239,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
     borderRadius: 20,
     backgroundColor: '#f5f5f5',
-    width: 100,
+    // width: 100,
     flexShrink: 1,
     justifyContent: 'center',
     alignItems: 'center',
