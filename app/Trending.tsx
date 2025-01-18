@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { Cloud, Thermometer, Plus, Search, User } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from './types/navigation';
 
 // Types for our data
 interface Post {
@@ -19,6 +22,8 @@ interface Prompt {
 
 const categories = ['Sports', 'Music', 'Movies', 'Food'];
 
+type TrendingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Trending'>;
+
 export default function Trending() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -34,14 +39,14 @@ export default function Trending() {
     try {
       const response = await fetch('http://34.139.77.174/api/posts');
       const data = await response.json();
-      
+
       // Sort posts by absolute vote count (both upvotes and downvotes)
       const sortedPosts = data.sort((a: Post, b: Post) => {
         const aTotalVotes = Math.abs(a.UpvoteCount) + Math.abs(a.DownvoteCount);
         const bTotalVotes = Math.abs(b.UpvoteCount) + Math.abs(b.DownvoteCount);
         return bTotalVotes - aTotalVotes;
       });
-      
+
       // Get top 20 posts
       setPosts(sortedPosts.slice(0, 20));
 
@@ -76,7 +81,7 @@ export default function Trending() {
     // Determine which count to show based on which is higher
     const showUpvotes = post.UpvoteCount > post.DownvoteCount;
     const count = showUpvotes ? post.UpvoteCount : post.DownvoteCount;
-  
+
     return (
       <View style={[styles.voteContainer, { backgroundColor: showUpvotes ? '#ffebee' : '#fff3e0' }]}>
         <Text style={styles.voteCount}>{count}</Text>
@@ -84,15 +89,15 @@ export default function Trending() {
       </View>
     );
   };
-    
+
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Trending</Text>
-      
+
       {/* Category Filters */}
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.categoriesContainer}
       >

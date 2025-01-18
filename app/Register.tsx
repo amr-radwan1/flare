@@ -5,7 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types/navigation';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
 
-type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>;
+type RegisterScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>;
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -14,7 +14,7 @@ export default function Register() {
     lastName: '',
   });
 
-  const navigation = useNavigation<LoginScreenNavigationProp>();
+  const navigation = useNavigation<RegisterScreenNavigationProp>();
 
   const handleSignUp = async () => {
     try {

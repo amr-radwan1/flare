@@ -4,11 +4,11 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types/navigation';
 
-type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'index'>;
+type indexScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'index'>;
 
 export default function Index() {
   const [Username, setUsername] = useState('');
-  const navigation = useNavigation<LoginScreenNavigationProp>();
+  const navigation = useNavigation<indexScreenNavigationProp>();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -56,7 +56,7 @@ export default function Index() {
         <View style={styles.formContainer}>
           <View style={styles.inputGroup}>
             <Text style={styles.label}>username</Text>
-            <TextInput    
+            <TextInput
               style={styles.input}
               value={Username}
               onChangeText={setUsername}
