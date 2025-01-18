@@ -3,6 +3,7 @@ import Index from './index';
 import Register from './Register';
 import Trending from './Trending';
 import ProfileScreen from './ProfileScreen';
+import DailyPrompt from './DailyPrompt';
 
 const AuthStack = createNativeStackNavigator();
 
@@ -17,6 +18,7 @@ export default function AuthNavigator() {
       <AuthStack.Screen name="Register" component={Register} />
       <AuthStack.Screen name="Trending" component={Trending} />
       <AuthStack.Screen name="ProfileScreen" component={ProfileScreen} />
+      <AuthStack.Screen name="DailyPrompt" component={DailyPrompt} />
 
     </AuthStack.Navigator>
   );
