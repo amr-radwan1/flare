@@ -58,9 +58,11 @@ export default function NewFlarePrompt() {
 
   const handleCreate = () => {
     const finalPrompt = selectedPrompt || prompt;
+    // we also need to pass the category to NewFlarePost
+    
     if (finalPrompt) {
       // Create the prompt logic here
-      navigation.navigate('NewFlarePost', { prompt: finalPrompt });
+      navigation.navigate('NewFlarePost', { prompt: finalPrompt, category });
     }
   };
 

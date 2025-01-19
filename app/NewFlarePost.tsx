@@ -2,16 +2,19 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Navbar from './Navbar';
+import { Category } from './NewFlareCategory';
 
 type RouteParams = {
+  category: Category;
   prompt: string;
 };
 
 export default function NewFlarePost() {
   const navigation = useNavigation();
   const route = useRoute();
-  const { prompt } = route.params as RouteParams;
-  
+  const data = route.params as RouteParams;
+  const { category, prompt } = data;
+
   const [answer, setAnswer] = useState('');
 
   const handleCancel = () => {
@@ -33,7 +36,9 @@ export default function NewFlarePost() {
         <Text style={styles.subtitle}>{prompt}</Text>
         
         <View style={styles.categoryBadge}>
-          <Text style={styles.categoryText}>📚 Edu</Text>
+          <Text style={styles.categoryText}>
+            {category.icon} {category.label}
+          </Text>
         </View>
         
         <TextInput
