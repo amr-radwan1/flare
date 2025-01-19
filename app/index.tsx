@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types/navigation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Font from 'expo-font'; // Import expo-font
+
 
 
 type indexScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'index'>;
@@ -13,6 +15,17 @@ export default function Index() {
   const navigation = useNavigation<indexScreenNavigationProp>();
 
   const [isLoading, setIsLoading] = useState(false);
+
+
+  useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync({
+        'Libre Baskerville': require('../assets/fonts/LibreBaskerville-Bold.ttf'),
+        // You can add more fonts if needed
+      });
+    }
+    loadFonts();
+  }, []);
 
   const handleLogin = async () => {
     setIsLoading(true);
@@ -54,23 +67,31 @@ export default function Index() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        {/* Logo and App Name */}
-        <Text style={styles.logo}>logo</Text>
-        <Text style={styles.appName}>appname</Text>
+        <View style={{ height: 30 }} />
+        {/* Centered Logo */}
+        <View style={styles.logoContainer}>
+          <Image
+            source={require('../assets/images/temp3.png')}
+            style={styles.avatar}
+          />
+          <Text style={styles.logoText}>flare.</Text>
+        </View>
+
+        <View style={{ height: 30 }} />
 
         {/* Form Fields */}
-        <View style={styles.formContainer}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>username</Text>
-            <TextInput
-              style={styles.input}
-              value={Username}
-              onChangeText={setUsername}
-              placeholder="jondoe23"
-              placeholderTextColor="#666"
-            />
-          </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>username</Text>
+          <TextInput
+            style={styles.input}
+            value={Username}
+            onChangeText={setUsername}
+            placeholder="jondoe23"
+            placeholderTextColor="#666"
+          />
         </View>
+
 
         {/* Login Button */}
         <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={isLoading}>
@@ -89,6 +110,7 @@ export default function Index() {
       </View>
     </SafeAreaView>
   );
+
 }
 
 const styles = StyleSheet.create({
@@ -101,31 +123,48 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 40,
   },
-  logo: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 8,
+  logoContainer: {
+    alignItems: 'center', // Center the logo horizontally
+    marginBottom: 40, // Add spacing below the logo if needed
   },
-  appName: {
-    fontSize: 24,
-    fontWeight: '500',
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 20,
+  },
+  logoText: {
+    fontSize: 50,
     textAlign: 'center',
-    marginBottom: 40,
+    fontFamily: 'Libre Baskerville',
   },
   formContainer: {
-    gap: 20,
+    alignItems: 'center',
+    gap: 10,
+    maxWidth: 300,
   },
   inputGroup: {
     gap: 8,
+    alignSelf: 'center'
   },
   label: {
     fontSize: 16,
     fontWeight: '500',
+    fontFamily: 'Libre Baskerville',
   },
   input: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    padding: 12,
+    backgroundColor: '#fff',
+    marginBottom: 16,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    fontFamily: "Libre Baskerville",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    maxHeight: 100,
+    width: 300,
+    elevation: 3,
     fontSize: 16,
   },
   loginButton: {
@@ -141,6 +180,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     textAlign: 'center',
+    fontFamily: 'Libre Baskerville',
   },
   signUpContainer: {
     marginTop: 16,
@@ -149,5 +189,7 @@ const styles = StyleSheet.create({
   signUpText: {
     fontSize: 16,
     color: '#000',
+    fontFamily: 'Libre Baskerville',
   },
 });
+

@@ -2,20 +2,34 @@ import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
+  Image,
   ScrollView,
   TextInput,
   TouchableOpacity,
-  Image,
+  StyleSheet,
   SafeAreaView,
   ActivityIndicator,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from './types/navigation';
 import Navbar from './Navbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Font from 'expo-font'; // Import expo-font
 
-type RepliesScreenRouteProp = RouteProp<RootStackParamList, 'Replies'>;
+const categories = [
+  { id: 'sports', label: 'sports', icon: '🏈' },
+  { id: 'music', label: 'music', icon: '🎵' },
+  { id: 'movies', label: 'movies', icon: '🎬' },
+  { id: 'food', label: 'food', icon: '🍽' },
+  { id: 'fashion', label: 'fashion', icon: '🧥' },
+  { id: 'tech', label: 'tech', icon: '📱' },
+  { id: 'travel', label: 'travel', icon: '🌍' },
+  { id: 'politics', label: 'politics', icon: '⚖️' },
+  { id: 'health', label: 'health', icon: '🩺' },
+  { id: 'fitness', label: 'fitness', icon: '🏋️‍♂️' },
+];
 
 interface Prompt {
   PromptID: number;
@@ -46,6 +60,8 @@ interface Reply {
   ReplyText: string;
 }
 
+type RepliesScreenRouteProp = RouteProp<RootStackParamList, 'Replies'>;
+
 export default function Replies() {
   const route = useRoute<RepliesScreenRouteProp>();
   const { postId, promptId } = route?.params ?? { postId: 0, promptId: 0 };
@@ -57,64 +73,48 @@ export default function Replies() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync({
+        'Libre Baskerville': require('../assets/fonts/LibreBaskerville-Bold.ttf'),
+        // You can add more fonts if needed
+      });
+    }
+    loadFonts();
     fetchData();
   }, [postId, promptId]);
 
   const fetchData = async () => {
     try {
       setIsLoading(true);
-  
-      // Fetch replies
       const repliesResponse = await fetch(`http://34.139.77.174/api/posts/${postId}/replies`);
-      if (!repliesResponse.ok) {
-        throw new Error(`Failed to fetch replies: ${repliesResponse.status}`);
-      }
-      const repliesData = (await repliesResponse.json()).replies;
-  
-      // Fetch prompt details
       const promptResponse = await fetch(`http://34.139.77.174/api/prompt/${promptId}`);
-      if (!promptResponse.ok) {
-        throw new Error(`Failed to fetch prompt: ${promptResponse.status}`);
-      }
-      const promptData = await promptResponse.json();
-      setPrompt(promptData);
-  
-      // Fetch the post details
       const postResponse = await fetch(`http://34.139.77.174/api/posts/${postId}`);
-      if (!postResponse.ok) {
-        throw new Error(`Failed to fetch post info: ${postResponse.status}`);
+
+      if (!repliesResponse.ok || !promptResponse.ok || !postResponse.ok) {
+        throw new Error('Failed to fetch data');
       }
+
+      const repliesData = (await repliesResponse.json()).replies;
+      const promptData = await promptResponse.json();
       const postData = await postResponse.json();
-      setPost(postData);
-  
-      // Fetch the original poster's user details
       const originalPosterResponse = await fetch(`http://34.139.77.174/api/user/${postData.UserID}`);
+
       if (!originalPosterResponse.ok) {
-        throw new Error(`Failed to fetch original poster info: ${originalPosterResponse.status}`);
+        throw new Error('Failed to fetch user info');
       }
+
       const originalPosterData = await originalPosterResponse.json();
-      setOriginalPoster({
-        UserID: originalPosterData.UserID,
-        Username: originalPosterData.Username,
-        ProfilePicture: originalPosterData.ProfilePicture,
-      });
-  
-      // Get the user info for each reply
       const repliesWithUserInfo = await Promise.all(
         repliesData.map(async (reply: Reply) => {
           const userResponse = await fetch(`http://34.139.77.174/api/user/${reply.UserID}`);
-          if (!userResponse.ok) {
-            throw new Error(`Failed to fetch user ${reply.UserID}: ${userResponse.status}`);
-          }
           const userData = await userResponse.json();
-          return {
-            ...reply,
-            Username: userData.Username,
-            ProfilePicture: userData.ProfilePicture,
-          };
+          return { ...reply, Username: userData.Username, ProfilePicture: userData.ProfilePicture };
         })
       );
-  
+
+      setPrompt(promptData);
+      setPost(postData);
+      setOriginalPoster(originalPosterData);
       setReplies(repliesWithUserInfo);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -124,36 +124,24 @@ export default function Replies() {
   };
 
   const handleReplySubmit = async () => {
-    if (!replyText.trim()) return; // Don't submit if the reply text is empty
+    if (!replyText.trim()) return;
 
     try {
       const userId = await AsyncStorage.getItem('UserID');
-      if (!userId) {
-        throw new Error('UserID not found');
-      }
+      if (!userId) throw new Error('UserID not found');
+
       const response = await fetch(`http://34.139.77.174/api/posts/${postId}/replies/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          UserID: parseInt(userId),
-          ReplyText: replyText
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ UserID: parseInt(userId), ReplyText: replyText }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to submit reply: ${response.status}`);
-      }
+      if (!response.ok) throw new Error('Failed to submit reply');
 
       const newReply = await response.json();
-
       const userResponse = await fetch(`http://34.139.77.174/api/user/${userId}`);
-      if (!userResponse.ok) {
-        throw new Error(`Failed to fetch user info: ${userResponse.status}`);
-      }
       const userData = await userResponse.json();
-      
+
       setReplies((prevReplies) => [
         ...prevReplies,
         {
@@ -165,7 +153,7 @@ export default function Replies() {
           ReplyText: replyText,
         },
       ]);
-      setReplyText(''); // Clear the input field after submission
+      setReplyText('');
     } catch (error) {
       console.error('Error submitting reply:', error);
     }
@@ -173,197 +161,175 @@ export default function Replies() {
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#fff" />
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#000" />
       </View>
     );
   }
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        {/* Prompt Section */}
-        <View style={styles.promptContainer}>
-          <Text style={styles.promptText}>
-            {prompt?.PromptText || 'Loading prompt...'}
-          </Text>
-          <View style={styles.categoryTag}>
-            <Text style={styles.categoryText}>{prompt?.Category || 'Category'}</Text>
-          </View>
-        </View>
+  const category = prompt?.Category;
 
-        {/* Main Post */}
-        {originalPoster && post && (
-          <View style={styles.mainPost}>
-            <View style={styles.userInfo}>
-              {/* <Image
-                source={{
-                  uri: originalPoster.ProfilePicture || 'https://via.placeholder.com/30',
-                }}
-                style={styles.avatar}
-              /> */}
-              <Text style={styles.username}>
-                {originalPoster.Username || 'Anonymous'}
-              </Text>
-            </View>
-            <Text style={styles.mainAnswer}>{post.PostText}</Text>
-            <View style={styles.voteContainer}>
+  return (
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+
+      <View style={styles.outsideContainer}>
+        <View style={styles.container}>
+
+          <Text style={styles.subtitle}>{prompt?.PromptText}</Text>
+
+
+          {/* Category */}
+          <View style={styles.categoryContainer}>
+            <Text style={styles.categoryText}>
+              {categories.find(c => c.id === category)?.icon} {categories.find(c => c.id === category)?.label}
+            </Text>
+          </View>
+
+          {originalPoster && post && (
+            <View style={[styles.postSection, styles.centerAlign]}>
+              <View style={styles.posterInfo}>
+                <Image
+                  source={require('../assets/images/default_pfp.png')}
+                  style={styles.avatar}
+                />
+                <Text style={styles.usernameText}>
+                  {originalPoster.Username || 'Anonymous'} says...
+                </Text>
+              </View>
+              <Text style={styles.postText}>{post.PostText}</Text>
               <Text style={styles.voteCount}>{post.UpvoteCount || 0}</Text>
             </View>
-          </View>
-        )}
+          )}
 
-        {/* Replies Section */}
-        {replies.map((reply) => (
-          <View key={reply.ReplyID} style={styles.replyContainer}>
-            <View style={styles.userInfo}>
-              {/* <Image
-                source={{
-                  uri: reply.ProfilePicture || 'https://via.placeholder.com/30',
-                }}
-                style={styles.avatar}
-              /> */}
-              <Text style={styles.username}>
-                {reply.Username} replied...
-              </Text>
+          {replies.map((reply) => (
+            <View key={reply.ReplyID} style={styles.replySection}>
+              <Text style={styles.username}>{reply.Username} replied...</Text>
+              <Text style={styles.replyText}>{reply.ReplyText}</Text>
             </View>
-            <Text style={styles.replyText}>{reply.ReplyText}</Text>
-          </View>
-        ))}
+          ))}
 
-        {/* Reply Input */}
-        <View style={styles.replyInputContainer}>
-          <Text style={styles.replyInputLabel}>
-            Reply to {originalPoster?.Username || 'someone'}...
-          </Text>
-          <TextInput
-            style={styles.replyInput}
-            value={replyText}
-            onChangeText={setReplyText}
-            placeholder="Type your reply..."
-            placeholderTextColor="#666"
-          />
+          <View style={styles.replyInputSection}>
+            <TextInput
+              style={styles.replyInput}
+              value={replyText}
+              onChangeText={setReplyText}
+              placeholder="Type your reply..."
+              placeholderTextColor="#666"
+            />
+            <TouchableOpacity style={styles.submitButton} onPress={handleReplySubmit}>
+              <Text style={styles.submitButtonText}>Submit Reply</Text>
+            </TouchableOpacity>
+          </View>
+
         </View>
 
-        {/* Submit Button */}
-        <TouchableOpacity
-          style={styles.submitButton}
-          onPress={handleReplySubmit}
-        >
-          <Text style={styles.submitButtonText}>Submit Reply</Text>
-        </TouchableOpacity>
-      </ScrollView>
 
-      {/* Bottom Navigation */}
-      <Navbar activeNav={"Trending"} />
-    </SafeAreaView>
+        <Navbar activeNav="Trending" />
+      </View>
+
+    </TouchableWithoutFeedback>
+
   );
 }
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff', // Light background
-  },
-  scrollView: {
-    flex: 1,
-  },
-  promptContainer: {
-    padding: 20,
-  },
-  promptText: {
-    color: '#000', // Dark text color for light theme
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  categoryTag: {
-    backgroundColor: 'rgba(0, 0, 0, 0.1)', // Lighter background for category tag
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    alignSelf: 'flex-start',
-  },
-  categoryText: {
-    color: '#000', // Dark text for category tag
-    fontSize: 14,
-  },
-  mainPost: {
-    padding: 20,
-  },
-  userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  avatar: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    marginRight: 10,
-  },
-  username: {
-    color: '#000', // Dark text color for username
-    fontSize: 14,
-  },
-  mainAnswer: {
-    color: '#000', // Dark text for the main post
-    fontSize: 20,
-    fontWeight: 'bold',
+  loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  promptSection: { padding: 16 },
+  promptText: { fontSize: 20, fontWeight: 'bold', color: '#000', fontFamily: 'Libre Baskerville' },
+  categoryTag: { fontSize: 14, color: '#666', marginTop: 4 },
+  postSection: {
+    padding: 16,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
     marginVertical: 10,
+    width: '90%',
+    alignSelf: 'center', // Center the entire section on the screen
+    fontFamily: 'Libre Baskerville',
+  }, username: { fontSize: 16, fontWeight: 'bold', color: '#000' },
+
+  replySection: { padding: 16, borderTopWidth: 1, borderColor: '#ccc' },
+  replyText: { fontSize: 14, color: '#333', marginTop: 4 },
+  replyInputSection: { padding: 16 },
+  replyInput: { height: 40, borderColor: '#ccc', borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, color: '#000' },
+  submitButton: { marginTop: 16, backgroundColor: '#007BFF', padding: 12, borderRadius: 8 },
+  submitButtonText: { color: '#fff', textAlign: 'center', fontSize: 16 },
+  categoryText: {
+    fontSize: 18,
+    color: '#333',
+    fontFamily: 'Libre Baskerville',
   },
-  voteContainer: {
-    marginTop: 10,
+  centerAlign: {
+    alignItems: 'center', // Center content horizontally
+    justifyContent: 'center', // Center content vertically if needed
+  },
+  usernameText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+    fontFamily: 'Libre Baskerville'
+  },
+  postText: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    color: '#000',
+    textAlign: 'center', // Center-align the post text
+    marginVertical: 10,
+    fontFamily: 'Libre Baskerville'
   },
   voteCount: {
-    color: '#000', // Dark text color for votes
-    fontSize: 18,
-    fontWeight: 'bold',
-    alignSelf: 'flex-end',
-  },
-  replyContainer: {
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 0, 0, 0.1)', // Light divider color for replies
-  },
-  replyText: {
-    color: '#000', // Dark text color for replies
-    fontSize: 14,
-    marginTop: 5,
-  },
-  replyInputContainer: {
-    padding: 20,
-  },
-  replyInputLabel: {
-    color: '#000', // Dark label text for the reply input
     fontSize: 16,
-  },
-  replyInput: {
-    height: 40,
-    borderColor: '#000', // Dark border color
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingLeft: 10,
+    color: '#666',
     marginTop: 10,
-    color: '#000', // Dark text color for the input
   },
-  submitButton: {
-    backgroundColor: '#007BFF', // Button color remains the same
-    paddingVertical: 12,
-    borderRadius: 10,
-    marginHorizontal: 20,
-    marginVertical: 10,
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 20,
+    marginRight: 8,
   },
-  submitButtonText: {
-    color: '#fff', // White text on button
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: 'bold',
+  posterInfo: {
+    flexDirection: 'row', // Align avatar and username side-by-side
+    alignItems: 'center',
+    marginBottom: 10,
+    gap: 5,
   },
-  navbar: {
-    backgroundColor: '#f8f8f8', // Light background for the navbar
-    paddingVertical: 10,
+  container: {
+    backgroundColor: '#fff',
+    paddingTop: 60,
+    flex: 1, // Takes up the remaining space, pushing the navbar down
+  },
+  loadingContainer: {
+    flex: 1, // Occupies the entire screen
+    justifyContent: 'center', // Centers the loader vertically
+    // alignItems: 'center', // Centers the loader horizontally
+    // backgroundColor: '#222', // Optional background color
+  },
+  outsideContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+    justifyContent: 'space-between',
+  },
+  subtitle: {
+    fontSize: 20,
     paddingHorizontal: 20,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 0, 0, 0.1)', // Light border for the navbar
+    marginBottom: 20,
+    fontFamily: 'Libre Baskerville',
+    textAlign: 'center',
+  },
+  categoryContainer: {
+    backgroundColor: '#fff',
+    padding: 16,
+    marginBottom: 16,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    alignSelf: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    maxHeight: 60,
+    elevation: 3,
+
   },
 });
