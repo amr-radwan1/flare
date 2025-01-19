@@ -223,7 +223,7 @@ export default function Trending() {
             </View>
           ))}
         </ScrollView>
-        <Navbar />
+        <Navbar activeNav={'trending'} />
       </View>
     </View>
   );
