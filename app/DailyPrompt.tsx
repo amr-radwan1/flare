@@ -45,6 +45,7 @@ export default function DailyPrompt() {
                     PromptText: promptText,
                     Category: category,
                     UserID: 1, // Assuming you have the UserID (hardcoded or from AsyncStorage)
+                    PromptID:3
                 }),
             });
 
