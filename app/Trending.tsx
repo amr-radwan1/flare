@@ -11,7 +11,6 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types/navigation';
 import * as Font from 'expo-font'; // Import expo-font
 import { useNavigation } from '@react-navigation/native';
-import { Cloud, Thermometer, Plus, Search, User } from 'lucide-react-native';
 import Navbar from './Navbar'; // Import the Navbar component
 
 
@@ -57,9 +56,25 @@ export default function Trending() {
 
   const navigation = useNavigation<TrendingScreenNavigationProp>();
 
-  const navigateToProfile = () => {
-    navigation.navigate('ProfileScreen'); // Navigate to ProfileScreen
+  const handlePostPress = (postId: string, promptId: string) => {
+    try {
+      const numericPostId = Number(postId);
+      const numericPromptId = Number(promptId);
+      
+      if (isNaN(numericPostId) || isNaN(numericPromptId)) {
+        console.error('Invalid postId or promptId format');
+        return;
+      }
+      
+      navigation.navigate('Replies', {
+        postId: numericPostId,
+        promptId: numericPromptId
+      });
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
   };
+
 
   useEffect(() => {
     async function loadFonts() {
@@ -90,7 +105,6 @@ export default function Trending() {
         sortedPosts.map(async (post: Post) => {
           try {
             const promptResponse = await fetch(`http://34.139.77.174/api/prompt/${post.PromptID}`);
-
             if (!promptResponse.ok) {
               console.error('Failed to fetch prompt for post:', post.PromptID);
               return { ...post, PromptText: '', Category: '' }; // Return post with empty values in case of error
@@ -161,7 +175,11 @@ export default function Trending() {
 
         <ScrollView style={styles.postsContainer}>
           {posts.map((post) => (
-            <View key={post.PostID} style={styles.postCard}>
+            <TouchableOpacity
+              key={post.PostID}
+              style={styles.postCard}
+              onPress={() => handlePostPress(post.PostID, post.PromptID)}
+            >
               <View style={{ maxWidth: 270 }}>
                 {post.PromptText && (
                   <Text style={styles.promptText}>
@@ -179,9 +197,8 @@ export default function Trending() {
                   {post.UpvoteCount + post.DownvoteCount}
                 </Text>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
-
         </ScrollView>
         <Navbar />
       </View>

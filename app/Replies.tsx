@@ -1,160 +1,187 @@
 import React, { useEffect, useState } from 'react';
 import {
-  StyleSheet,
   View,
   Text,
-  SafeAreaView,
-  TouchableOpacity,
+  StyleSheet,
   ScrollView,
   TextInput,
+  TouchableOpacity,
   Image,
+  SafeAreaView,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import Icon from 'react-native-vector-icons/Feather';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useRoute, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from './types/navigation';
+import Navbar from './Navbar';
+
+type RepliesScreenRouteProp = RouteProp<RootStackParamList, 'Replies'>;
 
 
+interface Prompt {
+  PromptID: number;
+  PromptText: string;
+  Category: string;
+}
 
-type TrendingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Trending'>;
+interface User {
+  UserID: number;
+  Username: string;
+  ProfilePicture: string;
+}
 
-// Base API URL
-const API_BASE_URL = process.env.API_BASE_URL || 'http://34.139.77.174/api';
+interface Reply {
+  ReplyID: number;
+  UserID: number;
+  PostID: number;
+  Username: string;
+  ProfilePicture: string;
+  ReplyText: string;
+}
 
-// Avatar Component
-const Avatar = ({ letter, image, color }: { letter: string; image?: string; color?: string }) => (
-  <View style={[styles.avatar, { backgroundColor: image ? 'transparent' : color || '#333' }]}>
-    {image ? (
-      <Image source={{ uri: image }} style={styles.avatarImage} />
-    ) : (
-      <Text style={styles.avatarText}>{letter}</Text>
-    )}
-  </View>
-);
+export default function Replies() {
+  const route = useRoute<RepliesScreenRouteProp>();
 
-export default function Replies({ route }: { route: any }) {
-  const { post_id } = route.params; // Require post_id from navigation params
-  const [replies, setReplies] = useState<any[]>([]); // Ensure replies is always an array
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [newReply, setNewReply] = useState('');
-  const [token, setToken] = useState<string | null>(null);
+  const { postId, promptId } = route?.params ?? { postId: 0, promptId: 0 };
+  const [prompt, setPrompt] = useState<Prompt | null>(null);
+  const [originalPoster, setOriginalPoster] = useState<User | null>(null);
+  const [replies, setReplies] = useState<Reply[]>([]);
+  const [replyText, setReplyText] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch replies when the component mounts
   useEffect(() => {
-    const fetchReplies = async () => {
-      try {
-        const userToken = await AsyncStorage.getItem('userToken');
-        setToken(userToken);
+    fetchData();
+  }, [postId, promptId]);
 
-        const response = await fetch(`${API_BASE_URL}/posts/${post_id}/replies`, {
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-          },
-        });
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch replies');
-        }
 
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          setReplies(data); // Ensure data is an array
-        } else {
-          setReplies([]); // Fallback to empty array if data is not an array
-        }
-      } catch (err) {
-        setError(true);
-        console.error(err);
-        Alert.alert('Error', 'Failed to load replies. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchReplies();
-  }, [post_id]);
-
-  // Handle new reply submission
-  const handleReplySubmit = async () => {
-    if (!newReply.trim()) {
-      Alert.alert('Error', 'Reply cannot be empty.');
-      return;
-    }
-
+  const fetchData = async () => {
     try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/posts/${post_id}/replies`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ ReplyText: newReply }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit reply');
+      setIsLoading(true);
+      
+      // Fetch replies
+      const repliesResponse = await fetch(`http://34.139.77.174/api/posts/${postId}/replies`);
+      if (!repliesResponse.ok) {
+        throw new Error(`Failed to fetch replies: ${repliesResponse.status}`);
       }
+      const repliesData = (await repliesResponse.json()).replies;
+      console.log(repliesData);
 
-      const data = await response.json();
-      setReplies((prevReplies) => [...prevReplies, data]);
-      setNewReply('');
-    } catch (err) {
-      console.error(err);
-      Alert.alert('Error', 'Failed to submit reply. Please try again.');
+      // Fetch prompt details with proper error handling
+      const promptResponse = await fetch(`http://34.139.77.174/api/prompt/${promptId}`);
+      if (!promptResponse.ok) {
+        throw new Error(`Failed to fetch prompt: ${promptResponse.status}`);
+      }
+      const promptData = await promptResponse.json();
+      setPrompt(promptData);
+  
+      // Get the user info for each reply with error handling
+      const repliesWithUserInfo = await Promise.all(
+        repliesData.map(async (reply: Reply) => {
+          const userResponse = await fetch(`http://34.139.77.174/api/user/${reply.UserID}`);
+          if (!userResponse.ok) {
+            throw new Error(`Failed to fetch user ${reply.UserID}: ${userResponse.status}`);
+          }
+          const userData = await userResponse.json();
+          return {
+            ...reply,
+            Username: userData.Username,
+            ProfilePicture: userData.ProfilePicture
+          };
+        })
+      );
+  
+      setReplies(repliesWithUserInfo);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      // You might want to add some error state handling here
+      // setError(error.message);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#fff" />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar style="light" />
       <ScrollView style={styles.scrollView}>
-        <View style={styles.content}>
-          <Text style={styles.category}>🎵 Music</Text>
-
-          <Text style={styles.question}>Who is the most overrated singer of all time?</Text>
-
-          {/* Replies Section */}
-          <View style={styles.replies}>
-            {loading ? (
-              <ActivityIndicator size="large" color="#fff" />
-            ) : error ? (
-              <Text style={styles.errorText}>Failed to load replies.</Text>
-            ) : (
-              replies.map((reply: any, index: number) => (
-                <View key={index} style={[styles.reply, styles.replyCard]}>
-                  <View style={styles.userInfo}>
-                    <Avatar letter={reply.author.charAt(0).toUpperCase()} />
-                    <Text style={styles.userText}>{reply.author} replied...</Text>
-                  </View>
-                  <Text style={styles.replyText}>{reply.ReplyText}</Text>
-                </View>
-              ))
-            )}
-
-            <Text style={styles.replyPrompt}>Reply to the discussion...</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Type your reply"
-              placeholderTextColor="#666"
-              value={newReply}
-              onChangeText={setNewReply}
-            />
-            <TouchableOpacity style={styles.submitButton} onPress={handleReplySubmit}>
-              <Text style={styles.submitButtonText}>Submit</Text>
-            </TouchableOpacity>
+        {/* Prompt Section */}
+        <View style={styles.promptContainer}>
+          <Text style={styles.promptText}>
+            {prompt?.PromptText || 'Loading prompt...'}
+          </Text>
+          <View style={styles.categoryTag}>
+            <Text style={styles.categoryText}>{prompt?.Category || 'Category'}</Text>
           </View>
         </View>
+  
+        {/* Main Post */}
+        {originalPoster && (
+          <View style={styles.mainPost}>
+            <View style={styles.userInfo}>
+              <Image
+                source={{
+                  uri: originalPoster.ProfilePicture || 'https://via.placeholder.com/30',
+                }}
+                style={styles.avatar}
+              />
+              <Text style={styles.username}>
+                {originalPoster.Username || 'Anonymous'} says...
+              </Text>
+            </View>
+            <Text style={styles.mainAnswer}>Taylor Swift</Text> {/* Replace with the main post content if available */}
+            <View style={styles.voteContainer}>
+              <Text style={styles.voteCount}>110</Text> {/* Replace with vote count if needed */}
+            </View>
+          </View>
+        )}
+  
+        {/* Replies Section */}
+        {replies.map((reply) => (
+          <View key={reply.ReplyID} style={styles.replyContainer}>
+            <View style={styles.userInfo}>
+              <Image
+                source={{
+                  uri: reply.ProfilePicture || 'https://via.placeholder.com/30',
+                }}
+                style={styles.avatar}
+              />
+              <Text style={styles.username}>
+                {reply.Username} replied...
+              </Text>
+            </View>
+            <Text style={styles.replyText}>{reply.ReplyText}</Text>
+          </View>
+        ))}
+  
+        {/* Reply Input */}
+        <View style={styles.replyInputContainer}>
+          <Text style={styles.replyInputLabel}>
+            Reply to {originalPoster?.Username || 'someone'}...
+          </Text>
+          <TextInput
+            style={styles.replyInput}
+            value={replyText}
+            onChangeText={setReplyText}
+            placeholder="Type your reply..."
+            placeholderTextColor="#666"
+          />
+        </View>
       </ScrollView>
+  
+      {/* Bottom Navigation */}
+      <Navbar />
     </SafeAreaView>
   );
+  
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -164,63 +191,102 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  content: {
-    padding: 16,
+  promptContainer: {
+    padding: 20,
   },
-  category: {
-    color: '#666',
-    fontSize: 14,
-    marginBottom: 8,
-  },
-  question: {
+  promptText: {
     color: '#fff',
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 24,
+    marginBottom: 10,
   },
-  replies: {
-    paddingLeft: 16,
+  categoryTag: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
   },
-  reply: {
-    marginBottom: 16,
-  },
-  replyCard: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 12,
-  },
-  replyText: {
-    color: '#333',
-    fontSize: 14,
-  },
-  replyPrompt: {
-    color: '#666',
-    fontSize: 14,
-    marginVertical: 8,
-  },
-  input: {
+  categoryText: {
     color: '#fff',
-    fontSize: 16,
-    padding: 12,
-    backgroundColor: '#222',
-    borderRadius: 10,
-    marginTop: 8,
+    fontSize: 14,
   },
-  submitButton: {
-    backgroundColor: '#007AFF',
-    padding: 12,
-    borderRadius: 10,
+  mainPost: {
+    padding: 20,
+  },
+  userInfo: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 12,
+    marginBottom: 10,
   },
-  submitButtonText: {
+  avatar: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    marginRight: 10,
+  },
+  username: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
+  },
+  mainAnswer: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginVertical: 10,
+  },
+  voteContainer: {
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  voteCount: {
+    color: '#fff',
+    fontSize: 18,
     fontWeight: 'bold',
   },
-  errorText: {
-    color: '#FF4444',
+  replyContainer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.1)',
+  },
+  replyIcon: {
+    marginLeft: 'auto',
+  },
+  replyText: {
+    color: '#fff',
     fontSize: 14,
-    textAlign: 'center',
+    marginTop: 5,
+  },
+  replyInputContainer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.1)',
+  },
+  replyInputLabel: {
+    color: '#666',
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  replyInput: {
+    color: '#fff',
+    fontSize: 16,
+    padding: 0,
+  },
+  bottomNav: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#111',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.1)',
+  },
+  plusButton: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#333',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

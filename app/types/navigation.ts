@@ -4,5 +4,10 @@ export type RootStackParamList = {
   Trending: undefined; 
   ProfileScreen: undefined; 
   Navbar: undefined;
-  Replies: undefined;
+  Replies: {
+    postId: number;
+    promptId: number;
+  };
 };
+
+export default {};

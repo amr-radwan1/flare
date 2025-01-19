@@ -20,15 +20,10 @@ export default function Navbar() {
     navigation.navigate('Trending'); // Navigate to Trending
   }
 
-  const navigateToReplies = () => {
-    navigation.navigate('Replies'); // Navigate to Daily
-}
   
   return (
     <View style={styles.navbar}>
-      <TouchableOpacity onPress={navigateToReplies}>
-        <Cloud size={24} color="#fff" />
-      </TouchableOpacity>
+      <Cloud size={24} color="#fff" />
       <TouchableOpacity onPress={navigateToTrending}>
         <Thermometer size={24} color="#fff" />
       </TouchableOpacity>

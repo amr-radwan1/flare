@@ -20,7 +20,6 @@ export default function AuthNavigator() {
       <AuthStack.Screen name="Trending" component={Trending} />
       <AuthStack.Screen name="ProfileScreen" component={ProfileScreen} />
       <AuthStack.Screen name="Replies" component={Replies} />
-
     </AuthStack.Navigator>
   );
 }
