@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types/navigation';
-import { Category } from '../NewFlareCategory'; // Assuming Category is defined
+import Navbar from './Navbar';
 
 type NewFlarePromptNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -142,6 +142,10 @@ export default function NewFlarePrompt() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Navigation Bar */}
+      <Navbar activeNav="newFlare" />
+      
     </SafeAreaView>
   );
 }
