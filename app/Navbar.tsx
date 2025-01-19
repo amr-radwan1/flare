@@ -22,7 +22,11 @@ export default function Navbar() {
 
   const navigateToReplies = () => {
     navigation.navigate('Replies'); // Navigate to Daily
-}
+  }
+  
+  const navigateToNewFlareCategory = () => {
+    navigation.navigate('NewFlareCategory'); // Navigate to Daily
+  }
   
   return (
     <View style={styles.navbar}>
@@ -32,8 +36,12 @@ export default function Navbar() {
       <TouchableOpacity onPress={navigateToTrending}>
         <Thermometer size={24} color="#fff" />
       </TouchableOpacity>
-      <Plus size={24} color="#fff" />
-      <Search size={24} color="#fff" />
+      <TouchableOpacity onPress={navigateToNewFlareCategory}>
+        <Plus size={24} color="#fff" />
+      </TouchableOpacity>
+      <TouchableOpacity>
+        <Search size={24} color="#fff" />
+      </TouchableOpacity>
       <TouchableOpacity onPress={navigateToProfile}>
         <User size={24} color="#fff" /> {/* User Icon */}
       </TouchableOpacity>
