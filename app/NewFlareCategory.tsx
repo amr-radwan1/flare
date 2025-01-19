@@ -6,7 +6,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types/navigation';
 import Navbar from './Navbar';
 
-interface Category {
+export interface Category {
   id: string;
   label: string;
   icon: string;
@@ -20,7 +20,7 @@ const categories = [
   { id: 'fashion', label: 'fashion', icon: '🧥' },
   { id: 'tech', label: 'tech', icon: '📱' },
   { id: 'travel', label: 'travel', icon: '🌍' },
-  { id: 'edu', label: 'Education', icon: '📚' },
+  { id: 'edu', label: 'education', icon: '📚' },
   { id: 'politics', label: 'politics', icon: '⚖️' },
   { id: 'health', label: 'health', icon: '🩺' },
   { id: 'fitness', label: 'fitness', icon: '🏋️‍♂️' },
@@ -31,12 +31,11 @@ type NewFlareCategoryNavigationProp = NativeStackNavigationProp<
   'NewFlareCategory'
 >;
 
-export default function NewFlareScreen() {
+export default function NewFlareCategory() {
   const navigation = useNavigation<NewFlareCategoryNavigationProp>();
 
-  const handleCategorySelect = (category: Category) => {
-    // Navigate to NewFlarePrompt.tsx and pass the selected category
-    navigation.navigate('NewFlarePrompt', { category: category.label });
+  const handleCategorySelect = (category: { label: string; icon: string }) => {
+    navigation.navigate('NewFlarePrompt', { category }); // Passing category to NewFlarePrompt
   };
 
   return (
