@@ -5,6 +5,7 @@ import { Cloud, Thermometer, Plus, Search, User } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types/navigation';
+import Navbar from './Navbar';
 
 interface Category {
   id: string;

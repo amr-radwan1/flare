@@ -12,6 +12,7 @@ import { RootStackParamList } from './types/navigation';
 import * as Font from 'expo-font'; // Import expo-font
 import { useNavigation } from '@react-navigation/native';
 import Navbar from './Navbar'; // Import the Navbar component
+import { Image } from 'react-native';
 
 
 
@@ -32,17 +33,31 @@ interface Prompt {
 
 
 const categories = [
-  { id: 'sports', label: 'Sports', icon: '🏈' },
-  { id: 'music', label: 'Music', icon: '🎵' },
-  { id: 'movies', label: 'Movies', icon: '🎬' },
-  { id: 'food', label: 'Food', icon: '🍽' },
-  { id: 'fashion', label: 'Fashion', icon: '🧥' },
-  { id: 'tech', label: 'Tech', icon: '📱' },
-  { id: 'travel', label: 'Travel', icon: '🌍' },
-  { id: 'politics', label: 'Politics', icon: '⚖️' },
-  { id: 'health', label: 'Health', icon: '🩺' },
-  { id: 'fitness', label: 'Fitness', icon: '🏋️‍♂️' },
+  { id: 'sports', label: 'sports', icon: '🏈' },
+  { id: 'music', label: 'music', icon: '🎵' },
+  { id: 'movies', label: 'movies', icon: '🎬' },
+  { id: 'food', label: 'food', icon: '🍽' },
+  { id: 'fashion', label: 'fashion', icon: '🧥' },
+  { id: 'tech', label: 'tech', icon: '📱' },
+  { id: 'travel', label: 'travel', icon: '🌍' },
+  { id: 'politics', label: 'politics', icon: '⚖️' },
+  { id: 'health', label: 'health', icon: '🩺' },
+  { id: 'fitness', label: 'fitness', icon: '🏋️‍♂️' },
 ];
+
+const categoryEmojis: { [key: string]: string } = {
+  sports: '🏈',
+  music: '🎵',
+  movies: '🎬',
+  food: '🍽',
+  fashion: '🧥',
+  tech: '📱',
+  travel: '🌍',
+  politics: '⚖️',
+  health: '🩺',
+  fitness: '🏋️‍♂️',
+};
+
 type TrendingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Trending'>;
 
 export default function Trending() {
@@ -84,27 +99,26 @@ export default function Trending() {
       });
     }
     loadFonts();
-    fetchPosts();
-  }, []);
+    fetchPosts(selectedCategory);
+  }, [selectedCategory]);
 
-  const fetchPosts = async () => {
+  const fetchPosts = async (category: string) => {
     try {
-
       const response = await fetch('http://34.139.77.174/api/posts');
       const data = await response.json();
 
       // Sort by total engagement and take top 20
       const sortedPosts = data
-        .sort((a: Post, b: Post) =>
-          (b.UpvoteCount) - (a.UpvoteCount)
-        )
+        .sort((a: Post, b: Post) => b.UpvoteCount - a.UpvoteCount)
         .slice(0, 20);
 
       // Fetch prompt data for each post
       const postsWithPrompts = await Promise.all(
         sortedPosts.map(async (post: Post) => {
           try {
-            const promptResponse = await fetch(`http://34.139.77.174/api/prompt/${post.PromptID}`);
+            const promptResponse = await fetch(
+              `http://34.139.77.174/api/prompt/${post.PromptID}`
+            );
             if (!promptResponse.ok) {
               console.error('Failed to fetch prompt for post:', post.PromptID);
               return { ...post, PromptText: '', Category: '' }; // Return post with empty values in case of error
@@ -120,10 +134,17 @@ export default function Trending() {
           }
         })
       );
+      console.log(postsWithPrompts);
+      console.log(category);
+      // Filter posts based on category if it's not "all"
+      const filteredPosts =
+        category === 'all'
+          ? postsWithPrompts
+          : postsWithPrompts.filter((post) => post.Category === category);
 
 
 
-      setPosts(postsWithPrompts);
+      setPosts(filteredPosts);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -131,10 +152,24 @@ export default function Trending() {
     }
   };
 
+  const getVoteImage = (upvoteCount: number) => {
+    if (upvoteCount >= 0 && upvoteCount <= 25) {
+      return require('../assets/images/temp1.png');
+    } else if (upvoteCount >= 26 && upvoteCount <= 50) {
+      return require('../assets/images/temp2.png');
+    } else if (upvoteCount >= 51 && upvoteCount <= 75) {
+      return require('../assets/images/temp3.png');
+    } else {
+      return require('../assets/images/temp4.png');
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" />
+        <View style={{ height: 665 }}></View>
+        <Navbar activeNav={'trending'} />
       </View>
     );
   }
@@ -193,14 +228,22 @@ export default function Trending() {
               </Text>
 
               <View style={styles.voteContainer}>
+                <Image
+                  source={getVoteImage(post.UpvoteCount)}
+                  style={styles.voteImage} // Add styling for the image
+                />
                 <Text style={styles.voteCount}>
-                  {post.UpvoteCount + post.DownvoteCount}
+                  {post.UpvoteCount}
+                </Text>
+
+                <Text style={styles.voteCount}>
+                  {categoryEmojis[post.Category] || '❓'} {/* Show emoji or fallback */}
                 </Text>
               </View>
             </TouchableOpacity>
           ))}
         </ScrollView>
-        <Navbar />
+        <Navbar activeNav={'trending'} />
       </View>
     </View>
   );
@@ -225,8 +268,10 @@ const styles = StyleSheet.create({
     flex: 1, // Takes up the remaining space, pushing the navbar down
   },
   loadingContainer: {
-    backgroundColor: '#fff',
-    flex: 1, // Takes up the remaining space, pushing the navbar down
+    flex: 1, // Occupies the entire screen
+    justifyContent: 'center', // Centers the loader vertically
+    // alignItems: 'center', // Centers the loader horizontally
+    // backgroundColor: '#222', // Optional background color
   },
   title: {
     fontSize: 32,
@@ -265,6 +310,7 @@ const styles = StyleSheet.create({
   postsContainer: {
     paddingHorizontal: 20,
     paddingTop: 15,
+    maxHeight: 530
   },
   postCard: {
     backgroundColor: '#fff',
@@ -294,10 +340,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 16,
     top: 16,
-    backgroundColor: '#f5f5f5',
+    // backgroundColor: '#f5f5f5',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 16,
+    justifyContent: 'center', // Centers the content vertically
+    alignItems: 'center', // Aligns the content horizontally (if needed)
+    height: 'auto', // Let the height adjust based on content
+  },
+  voteImage: {
+    width: 30, // Adjust the width as needed
+    height: 30, // Adjust the height as needed
+    marginBottom: 4, // Add space between the image and the text
   },
   voteCount: {
     fontSize: 16,

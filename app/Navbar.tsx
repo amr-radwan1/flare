@@ -5,36 +5,40 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types/navigation';
 
-
 type TrendingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Navbar'>;
 
+type NavbarProps = {
+  activeNav: string;
+};
 
-export default function Navbar() {
+const Navbar: React.FC<NavbarProps> = ({ activeNav }) => {
   const navigation = useNavigation<TrendingScreenNavigationProp>();
 
-  const navigateToProfile = () => {
-    navigation.navigate('ProfileScreen'); // Navigate to ProfileScreen
+  const handleNavigation = (screen: keyof RootStackParamList) => {
+    console.log(screen)
+    navigation.navigate(screen);
   };
 
-  const navigateToTrending = () => {
-    navigation.navigate('Trending'); // Navigate to Trending
-  }
-
-  
   return (
     <View style={styles.navbar}>
-      <Cloud size={24} color="#fff" />
-      <TouchableOpacity onPress={navigateToTrending}>
-        <Thermometer size={24} color="#fff" />
+      <TouchableOpacity onPress={() => handleNavigation('DailyPrompt')}>
+        <Cloud size={24} color="#fff" strokeWidth={activeNav === 'dailyprompt' ? 4 : 1} />
       </TouchableOpacity>
-      <Plus size={24} color="#fff" />
-      <Search size={24} color="#fff" />
-      <TouchableOpacity onPress={navigateToProfile}>
-        <User size={24} color="#fff" /> {/* User Icon */}
+      <TouchableOpacity onPress={() => handleNavigation('Trending')}>
+        <Thermometer size={24} color="#fff" strokeWidth={activeNav === 'trending' ? 4 : 1} />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => handleNavigation('NewFlareCategory')}>
+        <Plus size={24} color="#fff" strokeWidth={activeNav === 'newFlare' ? 4 : 1} />
+      </TouchableOpacity>
+      <TouchableOpacity>
+        <Search size={24} color="#fff" strokeWidth={activeNav === 'search' ? 4 : 1} />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => handleNavigation('ProfileScreen')}>
+        <User size={24} color="#fff" strokeWidth={activeNav === 'profile' ? 4 : 1} />
       </TouchableOpacity>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   navbar: {
@@ -45,3 +49,5 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
 });
+
+export default Navbar;
