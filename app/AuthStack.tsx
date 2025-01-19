@@ -7,6 +7,7 @@ import ProfileScreen from './ProfileScreen';
 import Replies from './Replies';
 import EditProfileScreen from './EditProfile';
 import DailyPrompt from './DailyPrompt';
+import DailyFlare from './DailyFlare';
 
 const AuthStack = createNativeStackNavigator();
 
@@ -24,6 +25,7 @@ export default function AuthNavigator() {
       <AuthStack.Screen name="Replies" component={Replies} />
       <AuthStack.Screen name="DailyPrompt" component={DailyPrompt} />
       <AuthStack.Screen name="EditProfileScreen" component={EditProfileScreen} />
+      <AuthStack.Screen name="DailyFlare" component={DailyFlare}/>
     </AuthStack.Navigator>
   );
 }
