@@ -48,6 +48,8 @@ export default function ProfileScreen() {
   const [error, setError] = useState<string | null>(null);
   const [username, setUsername] = useState<string>('');
   const [userLoading, setUserLoading] = useState(true);
+  const [controversyScore, setControversyScore] = useState<number>(0);
+
 
   const navigation = useNavigation(); // Use navigation hook
 
@@ -89,8 +91,14 @@ export default function ProfileScreen() {
 
         const response = await fetch(`http://34.139.77.174/api/user/${userId}/posts`);
         const data = await response.json();
+
+        let totalVotes = 0;
+
         const postsWithPrompts = await Promise.all(
           data.posts.map(async (post: Post) => {
+
+            totalVotes += post.UpvoteCount + post.DownvoteCount;
+            console.log("Total votes: ", totalVotes);
             try {
               const promptResponse = await fetch(`http://34.139.77.174/api/prompt/${post.PromptID}`);
               if (!promptResponse.ok) {
@@ -107,6 +115,7 @@ export default function ProfileScreen() {
           })
         );
         setPosts(postsWithPrompts);
+        setControversyScore(totalVotes); 
       } catch (error) {
         console.error('Error fetching posts:', error);
         setError('Failed to load posts');
@@ -150,9 +159,7 @@ export default function ProfileScreen() {
         <View style={styles.header}>
           <View style={styles.profileInfo}>
             <Image
-              source={{
-                uri: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-01-18%20at%204.09.52%E2%80%AFPM-Q1yVXqjeHe9790R00cMhIk5txDRrf9.png',
-              }}
+              source={require('../assets/images/default_pfp.png')}
               style={styles.avatar}
             />
             {userLoading ? (
@@ -170,7 +177,7 @@ export default function ProfileScreen() {
 
         <View style={styles.scoreSection}>
           <Text style={styles.scoreTitle}>controversy score</Text>
-          <Text style={styles.scoreValue}>25</Text>
+          <Text style={styles.scoreValue}>{controversyScore}</Text>
         </View>
 
         <View style={styles.postsSection}>
