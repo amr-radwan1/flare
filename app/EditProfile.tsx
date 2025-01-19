@@ -2,6 +2,10 @@ import React from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from './types/navigation';
+
+type TrendingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Trending'>;
 
 export default function EditProfileScreen() {
   const navigation = useNavigation();
@@ -20,7 +24,7 @@ export default function EditProfileScreen() {
       {/* Profile Image */}
       <View style={styles.imageContainer}>
         <Image
-          source={require('./assets/images/profile.jpg')} // Path to your local image
+          source={require('../assets/images/Mr._Game_&_Watch_SSBU.png')} // Path to your local image
           style={styles.avatar}
         />
       </View>

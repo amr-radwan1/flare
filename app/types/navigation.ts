@@ -6,4 +6,5 @@ export type RootStackParamList = {
   Navbar: undefined;
   Replies: undefined;
   NewFlareCategory: undefined;
+  EditProfileScreen: undefined;
 };

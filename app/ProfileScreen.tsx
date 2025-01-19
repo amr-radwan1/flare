@@ -4,6 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Thermometer } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Navbar from './Navbar';
+import { useNavigation } from '@react-navigation/native'; // Import navigation
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from './types/navigation';
+
+type TrendingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Trending'>;
+
 
 interface Post {
   PostID: string;
@@ -33,6 +39,8 @@ export default function ProfileScreen() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const navigation = useNavigation(); // Use navigation hook
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -114,7 +122,10 @@ export default function ProfileScreen() {
             />
             <Text style={styles.username}>john doe</Text>
           </View>
-          <TouchableOpacity style={styles.editButton}>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => navigation.navigate('EditProfileScreen')} // Navigate to EditProfileScreen
+          >
             <Text style={styles.editButtonText}>edit profile</Text>
           </TouchableOpacity>
         </View>
