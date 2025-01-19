@@ -4,7 +4,8 @@ import Index from './index';
 import Register from './Register';
 import Trending from './Trending';
 import ProfileScreen from './ProfileScreen';
-import DailyPrompt from './Replies';
+import Replies from './Replies';
+import EditProfileScreen from './EditProfile';
 
 const AuthStack = createNativeStackNavigator();
 
@@ -20,6 +21,8 @@ export default function AuthNavigator() {
       <AuthStack.Screen name="Trending" component={Trending} />
       <AuthStack.Screen name="ProfileScreen" component={ProfileScreen} />
       <AuthStack.Screen name="Replies" component={Replies} />
+      <AuthStack.Screen name="EditProfileScreen" component={EditProfileScreen} />
+
 
     </AuthStack.Navigator>
   );
