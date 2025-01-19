@@ -102,7 +102,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView style={styles.content}>
         <View style={styles.header}>
           <View style={styles.profileInfo}>
@@ -130,8 +130,8 @@ export default function ProfileScreen() {
         </View>
       </ScrollView>
 
-      <Navbar />
-    </SafeAreaView>
+      <Navbar activeNav={'profile'} />
+    </View>
   );
 }
 
