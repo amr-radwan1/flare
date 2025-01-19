@@ -1,3 +1,5 @@
+import { Category } from '../NewFlareCategory'; 
+
 export type RootStackParamList = {
   index: undefined;
   Register: undefined;
@@ -8,7 +10,8 @@ export type RootStackParamList = {
     postId: number;
     promptId: number;
   };
-  NewFlareCategory: undefined;
+  NewFlareCategory: {category: Category};
+  NewFlarePrompt: {category: Category};
   DailyPrompt: undefined;
   EditProfileScreen: undefined;
 };
