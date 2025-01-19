@@ -15,13 +15,14 @@ const Navbar: React.FC<NavbarProps> = ({ activeNav }) => {
   const navigation = useNavigation<TrendingScreenNavigationProp>();
 
   const handleNavigation = (screen: keyof RootStackParamList) => {
+    console.log(screen)
     navigation.navigate(screen);
   };
 
   return (
     <View style={styles.navbar}>
-      <TouchableOpacity onPress={() => handleNavigation('Replies')}>
-        <Cloud size={24} color="#fff" strokeWidth={activeNav === 'replies' ? 4 : 1} />
+      <TouchableOpacity onPress={() => handleNavigation('DailyPrompt')}>
+        <Cloud size={24} color="#fff" strokeWidth={activeNav === 'dailyprompt' ? 4 : 1} />
       </TouchableOpacity>
       <TouchableOpacity onPress={() => handleNavigation('Trending')}>
         <Thermometer size={24} color="#fff" strokeWidth={activeNav === 'trending' ? 4 : 1} />
