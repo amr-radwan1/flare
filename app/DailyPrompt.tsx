@@ -31,7 +31,7 @@ const categories = [
 
 type DailyPromptNavigationProp = NativeStackNavigationProp<RootStackParamList, 'DailyPrompt'>;
 
-export default function PromptScreen() {
+export default function DailyPrompt() {
     const [fontLoaded, setFontLoaded] = useState(false);
     const [promptText, setPromptText] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('sports'); // Default to sports category
