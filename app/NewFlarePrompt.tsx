@@ -1,21 +1,17 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types/navigation';
+import { Category } from '../NewFlareCategory'; // Assuming Category is defined
 
 type NewFlarePromptNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'NewFlarePrompt'
 >;
+
+type NewFlarePromptRouteProp = RouteProp<RootStackParamList, 'NewFlarePrompt'>;
 
 const pastPrompts = [
   'Which university has the best computer science program?',
@@ -27,6 +23,10 @@ export default function NewFlarePrompt() {
   const [prompt, setPrompt] = useState<string>('');
   const [selectedPrompt, setSelectedPrompt] = useState<string | null>(null);
   const navigation = useNavigation<NewFlarePromptNavigationProp>();
+  
+  // Retrieve category from navigation params
+  const route = useRoute<NewFlarePromptRouteProp>();
+  const { category } = route.params;
 
   const handleCreate = () => {
     const finalPrompt = selectedPrompt || prompt;
@@ -37,7 +37,7 @@ export default function NewFlarePrompt() {
   };
 
   const handleCancel = () => {
-    navigation.navigate('Trending');
+    navigation.navigate('NewFlareCategory');
   };
 
   return (
@@ -45,8 +45,11 @@ export default function NewFlarePrompt() {
       <View style={styles.content}>
         <Text style={styles.title}>new flare</Text>
 
+        {/* Display the category label and icon */}
         <View style={styles.categoryBadge}>
-          <Text style={styles.categoryText}>📚 Edu</Text>
+          <Text style={styles.categoryText}>
+            {category.icon} {category.label}
+          </Text>
         </View>
 
         <Text style={styles.subtitle}>start typing a prompt</Text>
@@ -132,9 +135,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   categoryText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
+    fontSize: 14,
+    color: '#333',
+    textAlign: 'center',
+    fontFamily: 'Libre Baskerville',
   },
   subtitle: {
     fontSize: 18,
