@@ -154,6 +154,8 @@ export default function Trending() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" />
+        <View style={{ height: 665 }}></View>
+        <Navbar activeNav={'trending'} />
       </View>
     );
   }
@@ -248,8 +250,10 @@ const styles = StyleSheet.create({
     flex: 1, // Takes up the remaining space, pushing the navbar down
   },
   loadingContainer: {
-    backgroundColor: '#fff',
-    flex: 1, // Takes up the remaining space, pushing the navbar down
+    flex: 1, // Occupies the entire screen
+    justifyContent: 'center', // Centers the loader vertically
+    // alignItems: 'center', // Centers the loader horizontally
+    // backgroundColor: '#222', // Optional background color
   },
   title: {
     fontSize: 32,
