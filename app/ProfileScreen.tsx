@@ -21,6 +21,13 @@ interface Post {
   Category?: string;
 }
 
+interface UserData {
+  UserID: string;
+  Username: string;
+}
+
+
+
 const getUserId = async () => {
   try {
     const userId = await AsyncStorage.getItem('UserID');
@@ -39,10 +46,37 @@ export default function ProfileScreen() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [username, setUsername] = useState<string>('');
+  const [userLoading, setUserLoading] = useState(true);
 
   const navigation = useNavigation(); // Use navigation hook
 
   useEffect(() => {
+
+    const fetchUserData = async () => {
+      setUserLoading(true);
+      try {
+        const userId = await getUserId();
+        if (!userId) {
+          setError('User ID is not available');
+          setUserLoading(false);
+          return;
+        }
+
+        const response = await fetch(`http://34.139.77.174/api/user/${userId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+        const userData: UserData = await response.json();
+        setUsername(userData.Username);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setError('Failed to load user data');
+      } finally {
+        setUserLoading(false);
+      }
+    };
+
     const fetchPosts = async () => {
       setIsLoading(true);
       try {
@@ -81,6 +115,7 @@ export default function ProfileScreen() {
       }
     };
 
+    fetchUserData();
     fetchPosts();
   }, []);
 
@@ -120,7 +155,11 @@ export default function ProfileScreen() {
               }}
               style={styles.avatar}
             />
-            <Text style={styles.username}>john doe</Text>
+            {userLoading ? (
+              <ActivityIndicator size="small" color="#1a1a1a" />
+            ) : (
+              <Text style={styles.username}>{username || 'Unknown User'}</Text>
+            )}
           </View>
           <TouchableOpacity
             style={styles.editButton} // Navigate to EditProfileScreen

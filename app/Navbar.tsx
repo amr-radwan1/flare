@@ -16,7 +16,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeNav }) => {
 
   const handleNavigation = (screen: keyof RootStackParamList) => {
     console.log(screen)
-    navigation.navigate(screen);
+    navigation.navigate(screen as any);
   };
 
   return (

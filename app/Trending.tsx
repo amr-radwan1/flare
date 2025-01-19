@@ -134,8 +134,6 @@ export default function Trending() {
           }
         })
       );
-      console.log(postsWithPrompts);
-      console.log(category);
       // Filter posts based on category if it's not "all"
       const filteredPosts =
         category === 'all'

@@ -78,19 +78,7 @@ export default function NewFlareScreen() {
       </ScrollView>
 
       {/* Navigation Bar */}
-        <View style={styles.navbar}>
-            <TouchableOpacity onPress={navigateToCloud} >
-            <Cloud size={24} color="#fff" />
-            </TouchableOpacity>
-            <Thermometer size={24} color="#fff" />
-            <TouchableOpacity onPress={navigateToPlus} >
-                <Plus size={24} color="#fff" />
-            </TouchableOpacity>
-            <Search size={24} color="#fff" />
-            <TouchableOpacity onPress={navigateToProfile} >
-            <User size={24} color="#fff" /> {/* User Icon */}
-            </TouchableOpacity>
-        </View>
+        <Navbar activeNav="newFlare"/>
     </SafeAreaView>
   );
 }
