@@ -4,5 +4,5 @@ export type RootStackParamList = {
   Trending: undefined; 
   ProfileScreen: undefined; 
   Navbar: undefined;
-  DailyPrompt: undefined;
+  Replies: undefined;
 };

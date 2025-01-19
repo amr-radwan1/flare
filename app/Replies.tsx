@@ -14,6 +14,12 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import Icon from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from './types/navigation';
+
+
+
+type TrendingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Trending'>;
 
 // Base API URL
 const API_BASE_URL = process.env.API_BASE_URL || 'http://34.139.77.174/api';
@@ -29,7 +35,7 @@ const Avatar = ({ letter, image, color }: { letter: string; image?: string; colo
   </View>
 );
 
-export default function DailyPrompt({ route }: { route: any }) {
+export default function Replies({ route }: { route: any }) {
   const { post_id } = route.params; // Require post_id from navigation params
   const [replies, setReplies] = useState<any[]>([]); // Ensure replies is always an array
   const [loading, setLoading] = useState(true);
