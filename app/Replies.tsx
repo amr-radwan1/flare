@@ -34,7 +34,7 @@ interface Post {
   UserID: number;
   PromptID: number;
   PostText: string;
-  Votes: number;
+  UpvoteCount: number;
 }
 
 interface Reply {
@@ -196,19 +196,19 @@ export default function Replies() {
         {originalPoster && post && (
           <View style={styles.mainPost}>
             <View style={styles.userInfo}>
-              <Image
+              {/* <Image
                 source={{
                   uri: originalPoster.ProfilePicture || 'https://via.placeholder.com/30',
                 }}
                 style={styles.avatar}
-              />
+              /> */}
               <Text style={styles.username}>
                 {originalPoster.Username || 'Anonymous'}
               </Text>
             </View>
             <Text style={styles.mainAnswer}>{post.PostText}</Text>
             <View style={styles.voteContainer}>
-              <Text style={styles.voteCount}>{post.Votes || 0}</Text>
+              <Text style={styles.voteCount}>{post.UpvoteCount || 0}</Text>
             </View>
           </View>
         )}
@@ -217,12 +217,12 @@ export default function Replies() {
         {replies.map((reply) => (
           <View key={reply.ReplyID} style={styles.replyContainer}>
             <View style={styles.userInfo}>
-              <Image
+              {/* <Image
                 source={{
                   uri: reply.ProfilePicture || 'https://via.placeholder.com/30',
                 }}
                 style={styles.avatar}
-              />
+              /> */}
               <Text style={styles.username}>
                 {reply.Username} replied...
               </Text>
@@ -259,11 +259,10 @@ export default function Replies() {
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#fff', // Light background
   },
   scrollView: {
     flex: 1,
@@ -272,20 +271,20 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   promptText: {
-    color: '#fff',
+    color: '#000', // Dark text color for light theme
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
   },
   categoryTag: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(0, 0, 0, 0.1)', // Lighter background for category tag
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
     alignSelf: 'flex-start',
   },
   categoryText: {
-    color: '#fff',
+    color: '#000', // Dark text for category tag
     fontSize: 14,
   },
   mainPost: {
@@ -303,34 +302,31 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   username: {
-    color: '#fff',
+    color: '#000', // Dark text color for username
     fontSize: 14,
   },
   mainAnswer: {
-    color: '#fff',
+    color: '#000', // Dark text for the main post
     fontSize: 20,
     fontWeight: 'bold',
     marginVertical: 10,
   },
   voteContainer: {
-    alignItems: 'center',
     marginTop: 10,
   },
   voteCount: {
-    color: '#fff',
+    color: '#000', // Dark text color for votes
     fontSize: 18,
     fontWeight: 'bold',
+    alignSelf: 'flex-end',
   },
   replyContainer: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.1)',
-  },
-  replyIcon: {
-    marginLeft: 'auto',
+    borderTopColor: 'rgba(0, 0, 0, 0.1)', // Light divider color for replies
   },
   replyText: {
-    color: '#fff',
+    color: '#000', // Dark text color for replies
     fontSize: 14,
     marginTop: 5,
   },
@@ -338,29 +334,36 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   replyInputLabel: {
-    color: '#fff',
+    color: '#000', // Dark label text for the reply input
     fontSize: 16,
   },
   replyInput: {
     height: 40,
-    borderColor: '#fff',
+    borderColor: '#000', // Dark border color
     borderWidth: 1,
     borderRadius: 20,
     paddingLeft: 10,
     marginTop: 10,
-    color: '#fff',
+    color: '#000', // Dark text color for the input
   },
   submitButton: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#007BFF', // Button color remains the same
     paddingVertical: 12,
     borderRadius: 10,
     marginHorizontal: 20,
     marginVertical: 10,
   },
   submitButtonText: {
-    color: '#fff',
+    color: '#fff', // White text on button
     textAlign: 'center',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  navbar: {
+    backgroundColor: '#f8f8f8', // Light background for the navbar
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0, 0, 0, 0.1)', // Light border for the navbar
   },
 });
