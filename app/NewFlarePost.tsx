@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Navbar from './Navbar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Category } from './NewFlareCategory';
 
 type RouteParams = {
@@ -21,10 +22,64 @@ export default function NewFlarePost() {
     navigation.goBack();
   };
 
-  const handlePost = () => {
+  const handlePost = async () => {
     if (answer.trim()) {
-      // Handle post creation here
-      navigation.navigate('Trending');
+      try {
+        const userId = await AsyncStorage.getItem('UserID');
+        if (!userId) {
+          alert('User ID not found. Please log in again.');
+          return;
+        }
+
+        // Step 1: Create a new prompt entry
+        const promptResponse = await fetch('http://34.139.77.174/api/prompts/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            PromptText: prompt, // The prompt text passed to this screen
+            Category: category.label, // The category label
+          }),
+        });
+
+        if (!promptResponse.ok) {
+          throw new Error(`Failed to create the prompt: ${promptResponse.status}`);
+        }
+
+        const promptData = await promptResponse.json();
+        const promptId = promptData.PromptID; // Assuming the response includes the created prompt ID
+
+        // Step 2: Create a new post entry
+        const createdAt = new Date().toISOString(); // Current date-time for post creation
+
+        console.log(userId, createdAt, answer.trim(), promptId);
+        const postResponse = await fetch('http://34.139.77.174/api/posts/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            UserID: userId, // Logged-in user's ID
+            UpvoteCount: 0, // Initial upvote count
+            DowmvoteCount: 0, // Initial downvote count
+            CreatedAt: createdAt, // Time of post creation
+            PostText: answer.trim(), // User's answer
+            PromptID: promptId, // Link this post to the created prompt
+          }),
+        });
+
+        if (!postResponse.ok) {
+          throw new Error(`Failed to create the post: ${postResponse.status}`);
+        }
+
+        alert('Your post has been successfully submitted!');
+        setAnswer(''); // Clear the input field
+        navigation.navigate('Trending'); // Navigate to the Trending screen
+      } catch (error) {
+        console.error('Error creating the post:', error);
+        alert('Failed to create the post. Please try again.');
+      }
     }
   };
 
@@ -32,15 +87,15 @@ export default function NewFlarePost() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>new flare</Text>
-        
+
         <Text style={styles.subtitle}>{prompt}</Text>
-        
+
         <View style={styles.categoryBadge}>
           <Text style={styles.categoryText}>
             {category.icon} {category.label}
           </Text>
         </View>
-        
+
         <TextInput
           style={styles.textInput}
           placeholder="Type your answer..."
@@ -49,14 +104,14 @@ export default function NewFlarePost() {
           multiline
           autoFocus
         />
-        
+
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
             <Text style={styles.cancelText}>Cancel</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.createButton, !answer.trim() && styles.disabledButton]} 
+
+          <TouchableOpacity
+            style={[styles.createButton, !answer.trim() && styles.disabledButton]}
             onPress={handlePost}
             disabled={!answer.trim()}
           >

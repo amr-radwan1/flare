@@ -8,6 +8,9 @@ import Replies from './Replies';
 import EditProfileScreen from './EditProfile';
 import DailyPrompt from './DailyPrompt';
 import DailyFlare from './DailyFlare';
+import NewFlareCategory from './NewFlareCategory';
+import NewFlarePrompt from './NewFlarePrompt';
+import NewFlarePost from './NewFlarePost';
 
 const AuthStack = createNativeStackNavigator();
 
@@ -26,6 +29,9 @@ export default function AuthNavigator() {
       <AuthStack.Screen name="DailyPrompt" component={DailyPrompt} />
       <AuthStack.Screen name="EditProfileScreen" component={EditProfileScreen} />
       <AuthStack.Screen name="DailyFlare" component={DailyFlare}/>
+      <AuthStack.Screen name="NewFlareCategory" component={NewFlareCategory} />
+      <AuthStack.Screen name="NewFlarePrompt" component={NewFlarePrompt} />
+      <AuthStack.Screen name="NewFlarePost" component={NewFlarePost} />
     </AuthStack.Navigator>
   );
 }
