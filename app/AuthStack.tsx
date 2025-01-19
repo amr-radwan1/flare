@@ -11,6 +11,7 @@ import DailyFlare from './DailyFlare';
 import NewFlareCategory from './NewFlareCategory';
 import NewFlarePrompt from './NewFlarePrompt';
 import NewFlarePost from './NewFlarePost';
+import PostsForPrompt from './PostsForPrompt';
 
 const AuthStack = createNativeStackNavigator();
 
@@ -32,6 +33,7 @@ export default function AuthNavigator() {
       <AuthStack.Screen name="NewFlareCategory" component={NewFlareCategory} />
       <AuthStack.Screen name="NewFlarePrompt" component={NewFlarePrompt} />
       <AuthStack.Screen name="NewFlarePost" component={NewFlarePost} />
+      <AuthStack.Screen name="PostsForPrompt" component={PostsForPrompt} />
     </AuthStack.Navigator>
   );
 }

@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Thermometer } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,8 +16,10 @@ import { useNavigation } from '@react-navigation/native'; // Import navigation
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types/navigation';
 
-type TrendingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Trending'>;
-
+type TrendingScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'Trending'
+>;
 
 interface Post {
   PostID: string;
@@ -25,8 +35,6 @@ interface UserData {
   UserID: string;
   Username: string;
 }
-
-
 
 const getUserId = async () => {
   try {
@@ -50,11 +58,9 @@ export default function ProfileScreen() {
   const [userLoading, setUserLoading] = useState(true);
   const [controversyScore, setControversyScore] = useState<number>(0);
 
-
-  const navigation = useNavigation(); // Use navigation hook
+  const navigation = useNavigation<TrendingScreenNavigationProp>(); // Use navigation hook
 
   useEffect(() => {
-
     const fetchUserData = async () => {
       setUserLoading(true);
       try {
@@ -96,11 +102,12 @@ export default function ProfileScreen() {
 
         const postsWithPrompts = await Promise.all(
           data.posts.map(async (post: Post) => {
-
             totalVotes += post.UpvoteCount + post.DownvoteCount;
-            console.log("Total votes: ", totalVotes);
+            console.log('Total votes: ', totalVotes);
             try {
-              const promptResponse = await fetch(`http://34.139.77.174/api/prompt/${post.PromptID}`);
+              const promptResponse = await fetch(
+                `http://34.139.77.174/api/prompt/${post.PromptID}`
+              );
               if (!promptResponse.ok) {
                 console.error('Failed to fetch prompt for post:', post.PromptID);
                 return { ...post, PromptText: '', Category: '' }; // Fallback values
@@ -115,7 +122,7 @@ export default function ProfileScreen() {
           })
         );
         setPosts(postsWithPrompts);
-        setControversyScore(totalVotes); 
+        setControversyScore(totalVotes);
       } catch (error) {
         console.error('Error fetching posts:', error);
         setError('Failed to load posts');
@@ -127,6 +134,13 @@ export default function ProfileScreen() {
     fetchUserData();
     fetchPosts();
   }, []);
+
+  const navigateToReplies = (postId: string, promptId: string) => {
+    navigation.navigate('Replies', {
+      postId: Number(postId),
+      promptId: Number(promptId),
+    });
+  };
 
   const renderPosts = () => {
     if (isLoading) {
@@ -142,14 +156,20 @@ export default function ProfileScreen() {
     }
 
     return posts.map((post, index) => (
-      <View key={post.PostID || index} style={styles.card}>
-        <Text style={styles.promptText}>{post.PromptText || 'No prompt available'}</Text>
+      <TouchableOpacity
+        key={post.PostID || index}
+        style={styles.card}
+        onPress={() => navigateToReplies(post.PostID, post.PromptID)} // Navigate with postId and promptId
+      >
+        <Text style={styles.promptText}>
+          {post.PromptText || 'No prompt available'}
+        </Text>
         <Text style={styles.postText}>{post.PostText}</Text>
         <View style={styles.scoreContainer}>
           <Thermometer size={20} color="#1a1a1a" />
           <Text style={styles.scoreText}>{post.UpvoteCount}</Text>
         </View>
-      </View>
+      </TouchableOpacity>
     ));
   };
 

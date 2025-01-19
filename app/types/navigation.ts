@@ -14,5 +14,6 @@ export type RootStackParamList = {
   NewFlarePrompt: {category: Category};
   DailyPrompt: undefined;
   EditProfileScreen: undefined;
+  PostsForPrompt: undefined;
 };
 
