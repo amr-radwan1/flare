@@ -4,7 +4,7 @@ import Index from './index';
 import Register from './Register';
 import Trending from './Trending';
 import ProfileScreen from './ProfileScreen';
-import DailyPrompt from './Replies';
+import Replies from './Replies';
 
 const AuthStack = createNativeStackNavigator();
 
