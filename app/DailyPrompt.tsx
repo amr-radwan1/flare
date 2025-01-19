@@ -1,166 +1,186 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    StyleSheet,
+    ActivityIndicator,
+    Keyboard,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-// Replace with your API URL
-const API_BASE_URL = 'http://34.139.77.174/api';
+import Navbar from './Navbar'; // Import the Navbar component
 
 export default function DailyPrompt() {
-  const [prompt, setPrompt] = useState<string>(''); // Stores the prompt of the day
-  const [category, setCategory] = useState<string>(''); // Stores the category of the prompt
-  const [userResponse, setUserResponse] = useState<string>(''); // Stores user's answer
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [promptText, setPromptText] = useState(''); // To store the fetched prompt text
+    const [category, setCategory] = useState(''); // To store the fetched category
+    const [userResponse, setUserResponse] = useState(''); // To store the user's input
+    const [loading, setLoading] = useState(true); // To show a loading spinner when fetching data
 
-  // Fetch the "Prompt of the Day" from the backend
-  useEffect(() => {
+    // Fetch the prompt with prompt_id = 3
     const fetchPrompt = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch(`${API_BASE_URL}/prompt_of_the_day/`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch prompt of the day');
+        try {
+            const response = await fetch('http://34.139.77.174/api/prompt/3'); // Fetch the specific prompt
+            if (!response.ok) {
+                throw new Error(`Failed to fetch prompt: ${response.status}`);
+            }
+            const data = await response.json();
+            setPromptText(data.PromptText);
+            setCategory(data.Category);
+        } catch (error) {
+            console.error('Error fetching the prompt:', error);
+        } finally {
+            setLoading(false); // Stop showing the spinner
         }
-        const data = await response.json();
-        setPrompt(data.PromptText); // Assumes the API response has a "PromptText" field
-        setCategory(data.Category); // Assumes the API response has a "Category" field
-      } catch (error) {
-        console.error(error);
-        Alert.alert('Error', 'Failed to load the prompt of the day.');
-      } finally {
-        setIsLoading(false);
-      }
     };
 
-    fetchPrompt();
-  }, []);
+    // Handle submitting the user's response
+    const handleSubmit = async () => {
+        try {
+            const postResponse = await fetch('http://34.139.77.174/api/posts/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    PostText: userResponse,
+                    PromptText: promptText,
+                    Category: category,
+                    UserID: 1, // Assuming you have the UserID (hardcoded or from AsyncStorage)
+                    PromptID:3
+                }),
+            });
 
-  // Handle submitting the user's response
-  const handleSubmit = async () => {
-    if (!userResponse.trim()) {
-      Alert.alert('Error', 'Your response cannot be empty.');
-      return;
+            if (!postResponse.ok) {
+                throw new Error(`Failed to post response: ${postResponse.status}`);
+            }
+
+            const responseData = await postResponse.json();
+            console.log('Post successfully created:', responseData);
+            alert('Your response has been submitted!'); // Notify the user
+            setUserResponse(''); // Clear the input field
+        } catch (error) {
+            console.error('Error submitting the response:', error);
+            alert('Failed to submit your response. Please try again.');
+        }
+    };
+
+    // Fetch the prompt when the component mounts
+    useEffect(() => {
+        fetchPrompt();
+    }, []);
+
+    if (loading) {
+        return <ActivityIndicator size="large" color="#000" style={styles.loadingIndicator} />;
     }
 
-    setIsLoading(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/posts/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          PromptText: prompt,
-          UserResponse: userResponse,
-          Category: category, // Sends the category along with the response
-        }),
-      });
+    return (
+        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            <View style={styles.outsideContainer}>
+                <View style={styles.container}>
+                    <Text style={styles.title}>prompt of the day</Text>
 
-      if (!response.ok) {
-        throw new Error('Failed to submit your response');
-      }
+                    <View style={{ height: 100 }}></View>
 
-      Alert.alert('Success', 'Your response has been submitted!');
-      setUserResponse(''); // Clear the input field
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error', 'Failed to submit your response. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+                    {/* Display the fetched prompt */}
+                    <Text style={styles.subtitle}>{promptText}</Text>
 
-  return (
-    <SafeAreaView style={styles.container}>
-      {isLoading ? (
-        <ActivityIndicator size="large" color="#000" />
-      ) : (
-        <View>
-          {/* Prompt of the Day */}
-          <Text style={styles.title}>prompt of the day</Text>
-          <Text style={styles.promptText}>{prompt}</Text>
+                    {/* Display the fetched category */}
+                    <View style={styles.categoryContainer}>
+                        <Text style={styles.categoryText}>
+                            {category}
+                        </Text>
+                    </View>
 
-          {/* Category */}
-          {category && (
-            <View style={styles.categoryContainer}>
-              <Text style={styles.categoryText}>{category}</Text>
+                    <View style={{ height: 40 }} />
+
+                    {/* Input Field for User Response */}
+                    <View style={styles.inputGroup}>
+                        <View style={{ maxWidth: 350 }}>
+                            <TextInput
+                                style={styles.input}
+                                value={userResponse}
+                                onChangeText={setUserResponse}
+                                placeholder="Your response..."
+                                placeholderTextColor="#666"
+                            />
+                        </View>
+
+                        {/* Submit Button */}
+                        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                            <Text style={styles.submitButtonText}>send flare</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                <Navbar activeNav={'dailyprompt'} />
             </View>
-          )}
-
-          {/* User Response Input */}
-          <TextInput
-            style={styles.input}
-            placeholder="Type your answer here..."
-            placeholderTextColor="#999"
-            value={userResponse}
-            onChangeText={setUserResponse}
-          />
-
-          {/* Submit Button */}
-          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitButtonText}>Submit</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </SafeAreaView>
-  );
+        </TouchableWithoutFeedback>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  promptText: {
-    fontSize: 18,
-    textAlign: 'center',
-    marginBottom: 20,
-    color: '#333',
-  },
-  categoryContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  categoryText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#555',
-    backgroundColor: '#f0f0f0',
-    padding: 8,
-    borderRadius: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 16,
-    marginBottom: 20,
-  },
-  submitButton: {
-    backgroundColor: '#007BFF',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  submitButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+    inputGroup: {
+        gap: 10,
+        alignItems: 'center',
+    },
+    input: {
+        backgroundColor: '#fff',
+        marginBottom: 16,
+        borderRadius: 20,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        maxHeight: 100,
+        width: 300,
+        fontSize: 16,
+        elevation: 3,
+    },
+    outsideContainer: {
+        flex: 1,
+        backgroundColor: '#fff',
+        justifyContent: 'space-between',
+    },
+    container: {
+        backgroundColor: '#fff',
+        paddingTop: 60,
+        flex: 1,
+        alignItems: 'center',
+    },
+    title: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    subtitle: {
+        fontSize: 20,
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    categoryContainer: {
+        backgroundColor: '#fff',
+        padding: 16,
+        marginBottom: 16,
+        borderRadius: 20,
+        maxHeight: 60,
+        elevation: 3,
+    },
+    categoryText: {
+        fontSize: 18,
+        color: '#333',
+    },
+    submitButton: {
+        backgroundColor: '#333',
+        padding: 16,
+        marginBottom: 16,
+        borderRadius: 20,
+        maxHeight: 60,
+        elevation: 3,
+    },
+    submitButtonText: {
+        color: '#fff',
+        fontSize: 18,
+    },
+    loadingIndicator: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
 });
