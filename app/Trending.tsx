@@ -40,6 +40,7 @@ const categories = [
   { id: 'fashion', label: 'fashion', icon: '🧥' },
   { id: 'tech', label: 'tech', icon: '📱' },
   { id: 'travel', label: 'travel', icon: '🌍' },
+  { id: 'edu', label: 'education', icon: '📚' },
   { id: 'politics', label: 'politics', icon: '⚖️' },
   { id: 'health', label: 'health', icon: '🩺' },
   { id: 'fitness', label: 'fitness', icon: '🏋️‍♂️' },

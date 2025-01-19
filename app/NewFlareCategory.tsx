@@ -1,74 +1,59 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Cloud, Thermometer, Plus, Search, User } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types/navigation';
 import Navbar from './Navbar';
 
-interface Category {
+export interface Category {
   id: string;
   label: string;
   icon: string;
 }
 
-const categories: Category[] = [
-  { id: 'sports', label: 'Sports', icon: '🏀' },
-  { id: 'music', label: 'Music', icon: '🎵' },
-  { id: 'movies', label: 'Movies', icon: '🍿' },
-  { id: 'fashion', label: 'Fashion', icon: '👔' },
-  { id: 'travel', label: 'Travel', icon: '🌎' },
-  { id: 'food', label: 'Food', icon: '🍽️' },
-  { id: 'tech', label: 'Tech', icon: '📱' },
-  { id: 'health', label: 'Health', icon: '⚕️' },
-  { id: 'fitness', label: 'Fitness', icon: '🏃' },
-  { id: 'edu', label: 'Edu', icon: '📚' },
-  { id: 'drinks', label: 'Drinks', icon: '🍹' },
-  { id: 'nature', label: 'Nature', icon: '🌿' },
+const categories = [
+  { id: 'sports', label: 'sports', icon: '🏈' },
+  { id: 'music', label: 'music', icon: '🎵' },
+  { id: 'movies', label: 'movies', icon: '🎬' },
+  { id: 'food', label: 'food', icon: '🍽' },
+  { id: 'fashion', label: 'fashion', icon: '🧥' },
+  { id: 'tech', label: 'tech', icon: '📱' },
+  { id: 'travel', label: 'travel', icon: '🌍' },
+  { id: 'edu', label: 'education', icon: '📚' },
+  { id: 'politics', label: 'politics', icon: '⚖️' },
+  { id: 'health', label: 'health', icon: '🩺' },
+  { id: 'fitness', label: 'fitness', icon: '🏋️‍♂️' },
 ];
-type NewFlareCategoryNavigationProp = NativeStackNavigationProp<RootStackParamList, 'NewFlareCategory'>;
 
-export default function NewFlareScreen() {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+type NewFlareCategoryNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'NewFlareCategory'
+>;
+
+export default function NewFlareCategory() {
   const navigation = useNavigation<NewFlareCategoryNavigationProp>();
-  
-    const navigateToProfile = () => {
-      navigation.navigate('ProfileScreen'); // Navigate to ProfileScreen
-    };
 
-    const navigateToPlus = () => {
-        navigation.navigate('NewFlareCategory'); 
-      };
-  
-    const navigateToCloud = () => {
-      navigation.navigate('DailyPrompt')
-    };
+  const handleCategorySelect = (category: { label: string; icon: string }) => {
+    navigation.navigate('NewFlarePrompt', { category }); // Passing category to NewFlarePrompt
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
         <Text style={styles.title}>new flare</Text>
-        
+
         <View style={styles.content}>
           <Text style={styles.subtitle}>choose a category</Text>
-          
+
           <View style={styles.categoriesContainer}>
             {categories.map((category) => (
               <TouchableOpacity
                 key={category.id}
-                style={[
-                  styles.categoryButton,
-                  selectedCategory === category.id && styles.selectedCategory,
-                ]}
-                onPress={() => setSelectedCategory(category.id)}
+                style={styles.categoryButton}
+                onPress={() => handleCategorySelect(category)}
               >
-                <Text
-                  style={[
-                    styles.categoryText,
-                    selectedCategory === category.id && styles.selectedCategoryText,
-                  ]}
-                >
+                <Text style={styles.categoryText}>
                   {category.icon} {category.label}
                 </Text>
               </TouchableOpacity>
@@ -78,7 +63,7 @@ export default function NewFlareScreen() {
       </ScrollView>
 
       {/* Navigation Bar */}
-        <Navbar activeNav="newFlare"/>
+      <Navbar activeNav="newFlare" />
     </SafeAreaView>
   );
 }
@@ -138,25 +123,10 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
-  selectedCategory: {
-    backgroundColor: '#000',
-  },
   categoryText: {
     fontSize: 14,
     color: '#333',
     textAlign: 'center',
     fontFamily: 'Libre Baskerville',
-  },
-  selectedCategoryText: {
-    color: '#fff',
-  },
-  navbar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#222',
-    paddingVertical: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
   },
 });
