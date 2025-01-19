@@ -123,8 +123,7 @@ export default function ProfileScreen() {
             <Text style={styles.username}>john doe</Text>
           </View>
           <TouchableOpacity
-            style={styles.editButton}
-            onPress={() => navigation.navigate('EditProfileScreen')} // Navigate to EditProfileScreen
+            style={styles.editButton} // Navigate to EditProfileScreen
           >
             <Text style={styles.editButtonText}>edit profile</Text>
           </TouchableOpacity>

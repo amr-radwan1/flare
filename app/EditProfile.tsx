@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types/navigation';
 
-type TrendingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Trending'>;
+type TrendingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'EditProfileScreen'>;
 
 export default function EditProfileScreen() {
   const navigation = useNavigation();

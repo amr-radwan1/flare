@@ -176,7 +176,7 @@ export default function Replies() {
       </ScrollView>
   
       {/* Bottom Navigation */}
-      <Navbar />
+      <Navbar activeNav={"Trending"} />
     </SafeAreaView>
   );
   
