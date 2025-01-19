@@ -34,29 +34,29 @@ interface Prompt {
 
 
 const categories = [
-  { id: 'Sports', label: 'Sports', icon: '🏈' },
-  { id: 'Music', label: 'Music', icon: '🎵' },
-  { id: 'Movies', label: 'Movies', icon: '🎬' },
-  { id: 'Food', label: 'Food', icon: '🍽' },
-  { id: 'Fashion', label: 'Fashion', icon: '🧥' },
-  { id: 'Tech', label: 'Tech', icon: '📱' },
-  { id: 'Travel', label: 'Travel', icon: '🌍' },
-  { id: 'Politics', label: 'Politics', icon: '⚖️' },
-  { id: 'Health', label: 'Health', icon: '🩺' },
-  { id: 'Fitness', label: 'Fitness', icon: '🏋️‍♂️' },
+  { id: 'sports', label: 'sports', icon: '🏈' },
+  { id: 'music', label: 'music', icon: '🎵' },
+  { id: 'movies', label: 'movies', icon: '🎬' },
+  { id: 'food', label: 'food', icon: '🍽' },
+  { id: 'fashion', label: 'fashion', icon: '🧥' },
+  { id: 'tech', label: 'tech', icon: '📱' },
+  { id: 'travel', label: 'travel', icon: '🌍' },
+  { id: 'politics', label: 'politics', icon: '⚖️' },
+  { id: 'health', label: 'health', icon: '🩺' },
+  { id: 'fitness', label: 'fitness', icon: '🏋️‍♂️' },
 ];
 
 const categoryEmojis: { [key: string]: string } = {
-  Sports: '🏈',
-  Music: '🎵',
-  Movies: '🎬',
-  Food: '🍽',
-  Fashion: '🧥',
-  Tech: '📱',
-  Travel: '🌍',
-  Politics: '⚖️',
-  Health: '🩺',
-  Fitness: '🏋️‍♂️',
+  sports: '🏈',
+  music: '🎵',
+  movies: '🎬',
+  food: '🍽',
+  fashion: '🧥',
+  tech: '📱',
+  travel: '🌍',
+  politics: '⚖️',
+  health: '🩺',
+  fitness: '🏋️‍♂️',
 };
 
 type TrendingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Trending'>;
